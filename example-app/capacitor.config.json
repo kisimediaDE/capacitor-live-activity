@@ -1,6 +1,6 @@
 {
-  "appId": "com.example.plugin",
-  "appName": "example-app",
+  "appId": "de.kisimedia.LiveActivityPlugin",
+  "appName": "LiveActivityPlugin",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {
