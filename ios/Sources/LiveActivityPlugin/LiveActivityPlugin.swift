@@ -13,6 +13,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "startActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "isActivityRunning", returnType: CAPPluginReturnPromise),
     ]
     private let implementation = LiveActivity()
 
@@ -99,6 +100,19 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             } else {
                 call.reject("Failed to end Live Activity")
             }
+        }
+    }
+
+    @objc func isActivityRunning(_ call: CAPPluginCall) {
+        guard let id = call.getString("id") else {
+            call.reject("Missing 'id'")
+            return
+        }
+
+        implementation.isActivityRunning(id: id) { isRunning in
+            call.resolve([
+                "isRunning": isRunning
+            ])
         }
     }
 }

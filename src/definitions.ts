@@ -76,6 +76,16 @@ export interface EndActivityOptions {
 }
 
 /**
+ * Options for ending a Live Activity.
+ */
+export interface IsRunningActivityOptions {
+  /**
+   * The identifier of the Live Activity to check.
+   */
+  id: string;
+}
+
+/**
  * Capacitor Plugin for managing iOS Live Activities.
  */
 export interface LiveActivityPlugin {
@@ -93,4 +103,9 @@ export interface LiveActivityPlugin {
    * Ends a currently active Live Activity.
    */
   endActivity(options: EndActivityOptions): Promise<void>;
+
+  /**
+   * Checks if a Live Activity with the given ID is currently running.
+   */
+  isRunningActivity(options: IsRunningActivityOptions): Promise<{ running: boolean }>;
 }

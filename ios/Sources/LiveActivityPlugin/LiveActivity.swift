@@ -125,6 +125,13 @@ struct LiveActivityAttributes: ActivityAttributes {
             completion(true)
         }
     }
+
+    @objc public func isActivityRunning(id: String, completion: @escaping (Bool) -> Void) {
+        let isRunning = Activity<LiveActivityAttributes>.activities.contains { activity in
+            activity.attributes.id == id
+        }
+        completion(isRunning)
+    }
 }
 
 private struct ImageProcessor {

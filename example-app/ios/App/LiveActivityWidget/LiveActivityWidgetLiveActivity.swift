@@ -24,6 +24,15 @@ struct LiveActivityWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveActivityAttributes.self) { context in
             HStack(alignment: .center, spacing: 12) {
+                if let data = context.state.imageData,
+                   let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(context.state.title)
                         .font(.headline)
@@ -33,23 +42,14 @@ struct LiveActivityWidgetLiveActivity: Widget {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
-
-                    if let end = context.state.timerEndDate {
-                        Text("Ends at \(end.formatted(date: .omitted, time: .shortened))")
-                            .font(.footnote)
-                            .foregroundStyle(.gray)
-                    }
                 }
 
                 Spacer()
 
-                if let data = context.state.imageData,
-                   let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 50, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                if let end = context.state.timerEndDate {
+                    Text("Ends at \(end.formatted(date: .omitted, time: .shortened))")
+                        .font(.footnote)
+                        .foregroundStyle(.gray)
                 }
             }
             .padding()
@@ -57,20 +57,45 @@ struct LiveActivityWidgetLiveActivity: Widget {
             .activitySystemActionForegroundColor(Color.black)
         } dynamicIsland: { context in
             DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    if let data = context.state.imageData,
+                       let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .frame(width: 32, height: 32)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
                 DynamicIslandExpandedRegion(.center) {
-                    VStack {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(context.state.title)
+                            .font(.headline)
+
                         if let subtitle = context.state.subtitle {
                             Text(subtitle)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
+                DynamicIslandExpandedRegion(.trailing) {
+                    if let end = context.state.timerEndDate {
+                        Text(end.formatted(date: .omitted, time: .shortened))
+                            .font(.caption)
+                            .foregroundStyle(.gray)
+                    }
+                }
             } compactLeading: {
-                Text("▶")
+                Image(systemName: "clock.fill")
             } compactTrailing: {
-                Text("⏱")
+                if let end = context.state.timerEndDate {
+                    Text(end.formatted(date: .omitted, time: .shortened))
+                        .font(.caption2)
+                } else {
+                    Text("⏱")
+                }
             } minimal: {
-                Text("🔔")
+                Image(systemName: "bolt.circle")
             }
         }
     }
