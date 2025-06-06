@@ -41,12 +41,7 @@ struct LiveActivityAttributes: ActivityAttributes {
 
         let attributes = LiveActivityAttributes(id: id)
 
-        var imageData: Data? = nil
-        if let imageBase64 = imageBase64,
-            let imageDecoded = Data(base64Encoded: imageBase64)
-        {
-            imageData = imageDecoded
-        }
+        let imageData = ImageProcessor.resizedAndCompressedImage(from: imageBase64)
 
         let contentState = LiveActivityAttributes.ContentState(
             title: title,
@@ -98,10 +93,9 @@ struct LiveActivityAttributes: ActivityAttributes {
             updatedState.timerEndDate = date
         }
 
-        if let imageBase64 = imageBase64,
-            let imageDecoded = Data(base64Encoded: imageBase64)
-        {
-            updatedState.imageData = imageDecoded
+        let imageData = ImageProcessor.resizedAndCompressedImage(from: imageBase64)
+        if imageData != nil {
+            updatedState.imageData = imageData
         }
 
         Task {
@@ -130,5 +124,44 @@ struct LiveActivityAttributes: ActivityAttributes {
             activities.removeValue(forKey: id)
             completion(true)
         }
+    }
+}
+
+private struct ImageProcessor {
+    static func resizedAndCompressedImage(from base64: String?) -> Data? {
+        guard let base64 = base64,
+            let imageDecoded = Data(base64Encoded: base64),
+            let uiImage = UIImage(data: imageDecoded)
+        else {
+            return nil
+        }
+
+        let targetSize = CGSize(width: 117, height: 117)
+        UIGraphicsBeginImageContextWithOptions(targetSize, false, 1.0)
+        uiImage.draw(in: CGRect(origin: .zero, size: targetSize))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        guard let resized = resizedImage else {
+            print("⚠️ Failed to resize image.")
+            return nil
+        }
+
+        var quality: CGFloat = 0.8
+        while quality > 0.1 {
+            if let compressed = resized.jpegData(compressionQuality: quality),
+                compressed.count < 3000
+            {
+                print("✅ Successfully resized and compressed image to \(compressed.count) bytes.")
+                return compressed
+            }
+            print(
+                "⚠️ Resized image too large: \(resized.jpegData(compressionQuality: quality)?.count ?? 0) bytes at quality \(quality)"
+            )
+            quality -= 0.1
+        }
+
+        print("⚠️ Resized image too large even after compression.")
+        return nil
     }
 }

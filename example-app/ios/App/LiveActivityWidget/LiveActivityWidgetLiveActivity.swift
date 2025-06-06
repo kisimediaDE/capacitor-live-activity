@@ -23,29 +23,33 @@ struct LiveActivityAttributes: ActivityAttributes {
 struct LiveActivityWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveActivityAttributes.self) { context in
-            VStack(alignment: .leading, spacing: 8) {
-                Text(context.state.title)
-                    .font(.headline)
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(context.state.title)
+                        .font(.headline)
 
-                if let subtitle = context.state.subtitle {
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    if let subtitle = context.state.subtitle {
+                        Text(subtitle)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let end = context.state.timerEndDate {
+                        Text("Ends at \(end.formatted(date: .omitted, time: .shortened))")
+                            .font(.footnote)
+                            .foregroundStyle(.gray)
+                    }
                 }
 
-                if let end = context.state.timerEndDate {
-                    Text("Ends at \(end.formatted(date: .omitted, time: .shortened))")
-                        .font(.footnote)
-                        .foregroundStyle(.gray)
-                }
+                Spacer()
 
                 if let data = context.state.imageData,
                    let uiImage = UIImage(data: data) {
                     Image(uiImage: uiImage)
                         .resizable()
-                        .scaledToFit()
-                        .frame(height: 50)
-                        .cornerRadius(8)
+                        .scaledToFill()
+                        .frame(width: 50, height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
             }
             .padding()

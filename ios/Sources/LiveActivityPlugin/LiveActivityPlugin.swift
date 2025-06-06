@@ -19,10 +19,16 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func startActivity(_ call: CAPPluginCall) {
         guard let id = call.getString("id"),
             let title = call.getString("title"),
-            let timerEndDateString = call.getString("timerEndDate"),
-            let timerEndDate = ISO8601DateFormatter().date(from: timerEndDateString)
+            let timerEndDateString = call.getString("timerEndDate")
         else {
             call.reject("Missing or invalid parameters")
+            return
+        }
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let timerEndDate = formatter.date(from: timerEndDateString) else {
+            call.reject("Invalid date format")
             return
         }
 
@@ -53,8 +59,12 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         let title = call.getString("title")
         let subtitle = call.getString("subtitle")
         let timerEndDateString = call.getString("timerEndDate")
-        let timerEndDate =
-            timerEndDateString != nil ? ISO8601DateFormatter().date(from: timerEndDateString!) : nil
+        var timerEndDate: Date? = nil
+        if let timerEndDateString = timerEndDateString {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            timerEndDate = formatter.date(from: timerEndDateString)
+        }
         let imageBase64 = call.getString("imageBase64")
 
         implementation.updateActivity(

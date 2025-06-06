@@ -1,13 +1,23 @@
 import {LiveActivity} from "capacitor-live-activity";
 import {Camera, CameraResultType, CameraSource} from "@capacitor/camera";
 
+window.onerror = (msg, src, lineno, colno, err) => {
+    console.error("Global JS Error", { msg, src, lineno, colno, err });
+  };
+
 let base64Image = null;
 
 window.selectImage = async () => {
   try {
-    const image = await Camera.getPhoto({quality: 90, allowEditing: true, resultType: CameraResultType.Base64, source: CameraSource.Prompt});
+    const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Prompt
+      });
 
     base64Image = image.base64String;
+    console.log("Base64 length", base64Image?.length);
 
     const preview = document.getElementById("previewImage");
     preview.src = `data:image/jpeg;base64,${base64Image}`;
@@ -39,7 +49,7 @@ window.startActivity = async () => {
     title: inputTitleValue,
     subtitle: inputSubtitleValue,
     timerEndDate,
-    imageBase64
+    imageBase64: base64Image
   };
   console.log("StartActivity Params", startActivity);
 

@@ -24,16 +24,6 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to take photos for Live Activities</string>
-	<key>NSExtension</key>
-	<dict>
-		<key>NSExtensionAttributes</key>
-		<dict>
-			<key>SupportsLiveActivities</key>
-			<true/>
-		</dict>
-		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.widgetkit-extension</string>
-	</dict>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We might save photos for future use in Live Activities</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -65,6 +55,8 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+	<key>NSSupportsLiveActivities</key>
 	<true/>
 </dict>
 </plist>
