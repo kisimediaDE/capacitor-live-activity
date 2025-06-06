@@ -1,7 +1,7 @@
 > [!CAUTION]
 > ⚠️ **WARNING: This plugin is still under active development.**  
 > It is **not yet published on npm**, **not functional**, and may change significantly at any time.  
-> **Use at your own risk.** // Not published at npmjs yet!
+> **Use at your own risk.** 
 
 # capacitor-live-activity
 
