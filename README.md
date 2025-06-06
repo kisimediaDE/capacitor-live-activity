@@ -1,3 +1,8 @@
+> [!CAUTION]
+> ⚠️ **WARNING: This plugin is still under active development.**  
+> It is **not yet published on npm**, **not functional**, and may change significantly at any time.  
+> **Use at your own risk.** // Not published at npmjs yet!
+
 # capacitor-live-activity
 
 A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
