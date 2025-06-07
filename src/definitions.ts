@@ -1,62 +1,111 @@
+// definitions.ts
+// Capacitor Plugin for iOS Live Activities
+// Version: 0.0.1
+// Platform: iOS 16.1+
+// Author: Simon Kirchner
+// License: MIT
+
+export interface LiveActivityPlugin {
+  /**
+   * Starts a new Live Activity on iOS using the provided options.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  startActivity(options: StartActivityOptions): Promise<void>;
+
+  /**
+   * Updates the currently active Live Activity.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  updateActivity(options: UpdateActivityOptions): Promise<void>;
+
+  /**
+   * Ends the Live Activity and optionally provides a final state and dismissal policy.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  endActivity(options: EndActivityOptions): Promise<void>;
+
+  /**
+   * Returns whether Live Activities are available on this device and allowed by the user.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  isAvailable(): Promise<boolean>;
+
+  /**
+   * Returns true if a Live Activity with the given ID is currently running.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  isRunning(options: { id: string }): Promise<boolean>;
+
+  /**
+   * Returns the current active Live Activity state, if any.
+   *
+   * If an ID is provided, returns that specific activity.
+   * If no ID is given, returns the most recently started activity.
+   *
+   * @since 0.0.1
+   * @platform iOS
+   */
+  getCurrentActivity(options?: { id?: string }): Promise<LiveActivityState | undefined>;
+}
+
 /**
  * Options for starting a Live Activity.
  */
 export interface StartActivityOptions {
   /**
-   * A unique identifier for the Live Activity instance.
+   * Unique ID to identify the Live Activity.
    */
   id: string;
 
   /**
-   * The main title shown in the Live Activity.
+   * Immutable attributes that are part of the Live Activity.
    */
-  title: string;
+  attributes: Record<string, string>;
 
   /**
-   * Optional subtitle shown below the title.
+   * Initial content state (dynamic values).
    */
-  subtitle?: string;
+  contentState: Record<string, string>;
 
   /**
-   * The target date/time the timer or countdown ends.
-   * Must be an ISO 8601 string.
+   * Optional timestamp (Unix) when the Live Activity started.
    */
-  timerEndDate: string;
-
-  /**
-   * Optional image encoded as a Base64 string to be displayed in the Live Activity.
-   */
-  imageBase64?: string;
+  timestamp?: number;
 }
 
 /**
- * Options for updating an existing Live Activity.
+ * Options for updating a Live Activity.
  */
 export interface UpdateActivityOptions {
   /**
-   * The identifier of the Live Activity to update.
+   * ID of the Live Activity to update.
    */
   id: string;
 
   /**
-   * Updated title.
+   * Updated content state (dynamic values).
    */
-  title?: string;
+  contentState: Record<string, string>;
 
   /**
-   * Updated subtitle.
+   * Optional alert configuration to show a notification banner or Apple Watch alert.
    */
-  subtitle?: string;
+  alert?: AlertConfiguration;
 
   /**
-   * New target date/time (ISO 8601) if the timer has changed.
+   * Optional timestamp (Unix) when the update occurred.
    */
-  timerEndDate?: string;
-
-  /**
-   * Updated image as Base64 string.
-   */
-  imageBase64?: string;
+  timestamp?: number;
 }
 
 /**
@@ -64,48 +113,72 @@ export interface UpdateActivityOptions {
  */
 export interface EndActivityOptions {
   /**
-   * The identifier of the Live Activity to end.
+   * ID of the Live Activity to end.
    */
   id: string;
 
   /**
-   * Whether the activity should be dismissed immediately or allowed to fade out naturally.
-   * Default: true (dismiss immediately).
+   * Final state to show before dismissal.
    */
-  dismissed?: boolean;
+  contentState: Record<string, string>;
+
+  /**
+   * Optional timestamp (Unix) when the end occurred.
+   */
+  timestamp?: number;
+
+  /**
+   * Optional dismissal time in the future (Unix). If not provided, system default applies.
+   */
+  dismissalDate?: number;
 }
 
 /**
- * Options for ending a Live Activity.
+ * Represents an active Live Activity state.
  */
-export interface IsRunningActivityOptions {
+export interface LiveActivityState {
   /**
-   * The identifier of the Live Activity to check.
+   * The unique identifier of the activity.
    */
   id: string;
+
+  /**
+   * The current dynamic values of the activity.
+   */
+  values: Record<string, string>;
+
+  /**
+   * Whether the activity is stale.
+   */
+  isStale: boolean;
+
+  /**
+   * Whether the activity has ended.
+   */
+  isEnded: boolean;
+
+  /**
+   * ISO string timestamp when the activity started.
+   */
+  startedAt: string;
 }
 
 /**
- * Capacitor Plugin for managing iOS Live Activities.
+ * Configuration for alert notifications.
  */
-export interface LiveActivityPlugin {
+export interface AlertConfiguration {
   /**
-   * Starts a new Live Activity on iOS using the provided options.
+   * Optional title of the alert.
    */
-  startActivity(options: StartActivityOptions): Promise<void>;
+  title?: string;
 
   /**
-   * Updates an existing Live Activity with new data.
+   * Optional body text of the alert.
    */
-  updateActivity(options: UpdateActivityOptions): Promise<void>;
+  body?: string;
 
   /**
-   * Ends a currently active Live Activity.
+   * Optional sound file name or "default".
    */
-  endActivity(options: EndActivityOptions): Promise<void>;
-
-  /**
-   * Checks if a Live Activity with the given ID is currently running.
-   */
-  isRunningActivity(options: IsRunningActivityOptions): Promise<{ running: boolean }>;
+  sound?: string;
 }

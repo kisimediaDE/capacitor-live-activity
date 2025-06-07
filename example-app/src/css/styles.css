@@ -1,0 +1,117 @@
+:root {
+    --bg: #ffffff;
+    --text: #111;
+    --border: #ddd;
+    --card: #f8f8f8;
+    --button: #ef7c00;
+  }
+  
+  .dark {
+    --bg: #111;
+    --text: #eee;
+    --border: #444;
+    --card: #1e1e1e;
+    --button: #ffa733;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  button {
+    background-color: var(--button);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  
+  input,
+  textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--card);
+    color: var(--text);
+  }
+  
+  textarea {
+    min-height: 60px;
+    font-family: monospace;
+  }
+  
+  .card {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .log-section {
+    border: 1px dashed var(--border);
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--card);
+  }
+  
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.85rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-top: 1rem;
+  }
+  
+  .button-group button {
+    margin-right: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      --bg: #111;
+      --text: #eee;
+      --border: #444;
+      --card: #1e1e1e;
+      --button: #ffa733;
+    }
+  }
+  
+  .invalid {
+    border-color: red !important;
+    background-color: #ffebeb !important;
+  }
+  
+  .tooltip {
+    font-size: 0.75rem;
+    color: red;
+    margin-top: -6px;
+    margin-bottom: 10px;
+  }

@@ -2,7 +2,7 @@
 //  LiveActivityWidgetBundle.swift
 //  LiveActivityWidget
 //
-//  Created by Simon Kirchner on 06.06.25.
+//  Created by Simon Kirchner on 07.06.25.
 //
 
 import WidgetKit

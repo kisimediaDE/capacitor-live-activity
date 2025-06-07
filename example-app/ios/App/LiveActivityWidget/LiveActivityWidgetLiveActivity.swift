@@ -2,100 +2,53 @@
 //  LiveActivityWidgetLiveActivity.swift
 //  LiveActivityWidget
 //
-//  Created by Simon Kirchner on 06.06.25.
+//  Created by Simon Kirchner on 07.06.25.
 //
 
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct LiveActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        var title: String
-        var subtitle: String?
-        var timerEndDate: Date?
-        var imageData: Data?
-    }
-
-    var id: String
-}
-
 struct LiveActivityWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: LiveActivityAttributes.self) { context in
-            HStack(alignment: .center, spacing: 12) {
-                if let data = context.state.imageData,
-                   let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 50, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(context.state.title)
-                        .font(.headline)
-
-                    if let subtitle = context.state.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+        ActivityConfiguration(for: GenericAttributes.self) { context in
+            // Lock screen UI (Banner, Sperrbildschirm)
+            VStack {
+                Text("📡 Live Activity")
+                    .font(.headline)
+                Divider()
+                ForEach(context.state.values.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                    HStack {
+                        Text("\(key):")
+                            .fontWeight(.bold)
+                        Text(value)
                     }
-                }
-
-                Spacer()
-
-                if let end = context.state.timerEndDate {
-                    Text("Ends at \(end.formatted(date: .omitted, time: .shortened))")
-                        .font(.footnote)
-                        .foregroundStyle(.gray)
                 }
             }
             .padding()
-            .activityBackgroundTint(Color.white)
-            .activitySystemActionForegroundColor(Color.black)
+            .activityBackgroundTint(.blue)
+            .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
+            // Dynamic Island UI
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    if let data = context.state.imageData,
-                       let uiImage = UIImage(data: data) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .frame(width: 32, height: 32)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-                DynamicIslandExpandedRegion(.center) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(context.state.title)
-                            .font(.headline)
-
-                        if let subtitle = context.state.subtitle {
-                            Text(subtitle)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                    Text(context.state.values["title"] ?? "⏱")
+                        .font(.title3)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    if let end = context.state.timerEndDate {
-                        Text(end.formatted(date: .omitted, time: .shortened))
-                            .font(.caption)
-                            .foregroundStyle(.gray)
-                    }
+                    Text(context.state.values["status"] ?? "-")
+                        .font(.caption)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text(context.state.values["message"] ?? "")
+                        .font(.footnote)
                 }
             } compactLeading: {
-                Image(systemName: "clock.fill")
+                Text("🔔")
             } compactTrailing: {
-                if let end = context.state.timerEndDate {
-                    Text(end.formatted(date: .omitted, time: .shortened))
-                        .font(.caption2)
-                } else {
-                    Text("⏱")
-                }
+                Text(context.state.values["status"] ?? "")
             } minimal: {
-                Image(systemName: "bolt.circle")
+                Text("🎯")
             }
         }
     }

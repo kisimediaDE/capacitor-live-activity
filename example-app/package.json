@@ -13,7 +13,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor/camera": "^7.0.1",
     "@capacitor/core": "latest",
     "@capacitor/ios": "^7.3.0",
     "capacitor-live-activity": "file:.."
