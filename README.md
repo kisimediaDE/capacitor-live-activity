@@ -1,9 +1,3 @@
-> [!CAUTION]
-> ⚠️ This plugin is still under **active development**. ⚠️
->
-> While basic functionality (start/update/end) is working, it is **not yet published on npm** and subject to change.  
-> Use in production at your own risk.
-
 # 📡 capacitor-live-activity
 
 [![npm](https://img.shields.io/npm/v/capacitor-live-activity)](https://www.npmjs.com/package/capacitor-live-activity)
