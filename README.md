@@ -21,7 +21,7 @@ A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
 
 <docgen-index>
 
-- [⏱ capacitor-live-activity](#-capacitor-live-activity)
+- [📡 capacitor-live-activity](#-capacitor-live-activity)
   - [🧭 Table of contents](#-table-of-contents)
   - [📦 Install](#-install)
   - [🧩 Widget Setup (Required)](#-widget-setup-required)
