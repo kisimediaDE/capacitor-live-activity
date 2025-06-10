@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🍕 Food Order</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="stylesheet" href="./demo.css" />
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <script src="./demo.js" type="module"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="toolbar" role="banner" aria-label="Food Demo Toolbar">
+        <div class="toolbar-inner">
+          <a href="../../index.html" class="back-button" aria-label="Go back to overview">← Back</a>
+          <div class="title"><h1>🍕 Food Order</h1></div>
+          <div style="width: 40px;"></div>
+        </div>
+      </header>
+
+      <main class="content" role="main">
+        <section class="card">
+          <h2>Start Activity</h2>
+          <details>
+            <summary>📝 Show JSON Input</summary>
+            <input id="start-id" placeholder="Activity ID" />
+            <textarea id="start-attributes" placeholder='Attributes JSON'></textarea>
+            <textarea id="start-state" placeholder='Content State JSON'></textarea>
+          </details>
+          <button onclick="startActivity()">▶️ Start Activity</button>
+        </section>
+
+        <section class="card">
+          <h2>Update Activity</h2>
+          <details>
+            <summary>📝 Show JSON Input</summary>
+            <input id="update-id" placeholder="Activity ID" />
+            <textarea id="update-state" placeholder='Content State JSON'></textarea>
+            <textarea id="update-alert" placeholder='Alert JSON (optional)'></textarea>
+          </details>
+          <button onclick="updateActivity()">🔄 Update Activity</button>
+        </section>
+
+        <section class="card">
+          <h2>End Activity</h2>
+          <details>
+            <summary>📝 Show JSON Input</summary>
+            <input id="end-id" placeholder="Activity ID" />
+            <textarea id="end-state" placeholder='Final Content State JSON'></textarea>
+            <input id="end-dismissal" placeholder="Dismissal Timestamp (optional)" />
+          </details>
+          <button onclick="endActivity()">⏹ End Activity</button>
+        </section>
+
+        <section class="card">
+          <h2>Status & Info</h2>
+          <details>
+            <summary>📝 Show Activity ID</summary>
+            <input id="status-id" placeholder="Activity ID for Status" />
+          </details>
+          <div class="button-group">
+            <button onclick="checkAvailable()">✅ isAvailable</button>
+            <button onclick="checkRunning()">🕒 isRunning</button>
+            <button onclick="getCurrent()">📦 getCurrentActivity</button>
+          </div>
+        </section>
+
+        <section class="log-section">
+          <h2>📋 Log Output</h2>
+          <pre id="log"></pre>
+          <div style="text-align: right; margin-top: -1rem;">
+            <button onclick="clearLog()">🧹 Clear Log</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

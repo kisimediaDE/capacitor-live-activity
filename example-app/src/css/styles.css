@@ -1,21 +1,29 @@
 :root {
-    --bg: #ffffff;
+    --bg: #f9fafb;
     --text: #111;
     --border: #ddd;
-    --card: #f8f8f8;
+    --card: #fff;
     --button: #ef7c00;
+    --card-hover: #f2f2f2;
   }
   
   .dark {
     --bg: #111;
     --text: #eee;
     --border: #444;
-    --card: #1e1e1e;
+    --card: #1a1a1a;
     --button: #ffa733;
+    --card-hover: #222;
   }
   
   * {
     box-sizing: border-box;
+  }
+
+  html, body {
+    height: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   
   body {
@@ -23,95 +31,133 @@
     font-family: system-ui, sans-serif;
     background-color: var(--bg);
     color: var(--text);
-    padding: 2rem;
+    padding: 0;
+  }
+
+  .app {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   
-  header {
+  .toolbar {
+    background-color: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: calc(env(safe-area-inset-top) + 0.5rem) 1rem 0.5rem 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .toolbar-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
   }
   
+  .title h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .theme-toggle {
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text);
+    cursor: pointer;
+  }
+  
+  .content {
+    padding: 1.5rem;
+    flex-grow: 1;
+  }
+
+  input,
+textarea {
+  font-size: 1rem; /* bleibt dann bei 14px */
+  -webkit-text-size-adjust: 100%;
+}
+  
   h1 {
+    font-size: 1.4rem;
     margin: 0;
-    font-size: 1.5rem;
   }
   
   button {
     background-color: var(--button);
     color: #fff;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 1.1rem;
     border-radius: 8px;
     cursor: pointer;
-    margin-top: 0.5rem;
   }
   
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background-color: var(--card);
-    color: var(--text);
+  .intro {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
   }
   
-  textarea {
-    min-height: 60px;
-    font-family: monospace;
+  .grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
   
   .card {
+    display: block;
     background-color: var(--card);
-    border: 1px solid var(--border);
-    padding: 1rem;
+    padding: 1rem 1.2rem;
     border-radius: 12px;
-    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    transition: background 0.2s ease;
   }
   
-  .log-section {
-    border: 1px dashed var(--border);
-    padding: 1rem;
-    border-radius: 8px;
-    background: var(--card);
-  }
-  
-  pre {
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-size: 0.85rem;
-    max-height: 250px;
-    overflow-y: auto;
-    padding-top: 1rem;
-  }
-  
-  .button-group button {
-    margin-right: 0.5rem;
-    margin-top: 0.5rem;
+  .card:hover {
+    background-color: var(--card-hover);
   }
 
+  .card:focus-visible {
+    outline: 2px solid var(--button);
+    outline-offset: 4px;
+  }
+  
+  footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  .back-button {
+    text-decoration: none;
+    font-size: 1.1rem;
+    color: var(--text);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .back-button:hover {
+    text-decoration: underline;
+  }
+  
   @media (prefers-color-scheme: dark) {
     :root:not(.light) {
       --bg: #111;
       --text: #eee;
       --border: #444;
-      --card: #1e1e1e;
+      --card: #1a1a1a;
       --button: #ffa733;
+      --card-hover: #222;
     }
-  }
-  
-  .invalid {
-    border-color: red !important;
-    background-color: #ffebeb !important;
-  }
-  
-  .tooltip {
-    font-size: 0.75rem;
-    color: red;
-    margin-top: -6px;
-    margin-bottom: 10px;
   }

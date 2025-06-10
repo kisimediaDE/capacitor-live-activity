@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
+    "fast-glob": "^3.3.3",
     "vite": "^6.3.5"
   },
   "author": "",

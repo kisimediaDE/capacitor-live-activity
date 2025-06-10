@@ -1,13 +1,57 @@
 > [!CAUTION]
-> ⚠️ This plugin is still under **active development**.  
+> ⚠️ This plugin is still under **active development**. ⚠️
+>
 > While basic functionality (start/update/end) is working, it is **not yet published on npm** and subject to change.  
 > Use in production at your own risk.
 
-# capacitor-live-activity
+# ⏱ capacitor-live-activity
+
+[![npm](https://img.shields.io/npm/v/capacitor-live-activity)](https://www.npmjs.com/package/capacitor-live-activity)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/capacitor-live-activity)](https://bundlephobia.com/result?p=capacitor-live-activity)
+[![License: MIT](https://img.shields.io/npm/l/capacitor-live-activity)](./LICENSE)
+[![Platforms](https://img.shields.io/badge/platforms-iOS-orange)](#-platform-behavior)
+[![Capacitor](https://img.shields.io/badge/capacitor-7.x-blue)](https://capacitorjs.com/)
 
 A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
 
-## Install
+> [!TIP]
+> 🚀 Looking for a ready-to-run demo? → [Try the Example App](./example-app/)
+
+## 🧭 Table of contents
+
+<docgen-index>
+
+- [⏱ capacitor-live-activity](#-capacitor-live-activity)
+  - [🧭 Table of contents](#-table-of-contents)
+  - [📦 Install](#-install)
+  - [🧩 Widget Setup (Required)](#-widget-setup-required)
+    - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
+    - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
+    - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
+      - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
+      - [Why is this needed?](#why-is-this-needed)
+    - [4. Add Capability](#4-add-capability)
+    - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
+  - [📱 Example App](#-example-app)
+  - [🛠 API](#-api)
+    - [startActivity(...)](#startactivity)
+    - [updateActivity(...)](#updateactivity)
+    - [endActivity(...)](#endactivity)
+    - [isAvailable()](#isavailable)
+    - [isRunning(...)](#isrunning)
+    - [getCurrentActivity(...)](#getcurrentactivity)
+    - [Interfaces](#interfaces)
+      - [StartActivityOptions](#startactivityoptions)
+      - [UpdateActivityOptions](#updateactivityoptions)
+      - [AlertConfiguration](#alertconfiguration)
+      - [EndActivityOptions](#endactivityoptions)
+      - [LiveActivityState](#liveactivitystate)
+    - [Type Aliases](#type-aliases)
+      - [Record](#record)
+
+</docgen-index>
+
+## 📦 Install
 
 ```bash
 npm install capacitor-live-activity
@@ -21,7 +65,7 @@ npx cap sync
 > This plugin **requires a Live Activity widget extension** to be present and configured in your Xcode project.  
 > Without a widget, Live Activities will not appear on the lock screen or Dynamic Island.
 
-## Widget Setup (Required)
+## 🧩 Widget Setup (Required)
 
 To use Live Activities, your app must include a widget extension that defines the UI for the Live Activity using ActivityKit. Without this, the Live Activity will not appear on the Lock Screen or Dynamic Island.
 
@@ -109,37 +153,21 @@ Go to your main app target → Signing & Capabilities tab and add:
 
 - Clean and rebuild the project (Cmd + Shift + K, then Cmd + B).
 
-## API
+## 📱 Example App
 
-<docgen-index>
+This plugin includes a fully functional demo app under the [`example-app/`](./example-app) directory.
 
-- [capacitor-live-activity](#capacitor-live-activity)
-  - [Install](#install)
-  - [Widget Setup (Required)](#widget-setup-required)
-    - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
-    - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
-    - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
-      - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
-      - [Why is this needed?](#why-is-this-needed)
-    - [4. Add Capability](#4-add-capability)
-    - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
-  - [API](#api)
-    - [startActivity(...)](#startactivity)
-    - [updateActivity(...)](#updateactivity)
-    - [endActivity(...)](#endactivity)
-    - [isAvailable()](#isavailable)
-    - [isRunning(...)](#isrunning)
-    - [getCurrentActivity(...)](#getcurrentactivity)
-    - [Interfaces](#interfaces)
-      - [StartActivityOptions](#startactivityoptions)
-      - [UpdateActivityOptions](#updateactivityoptions)
-      - [AlertConfiguration](#alertconfiguration)
-      - [EndActivityOptions](#endactivityoptions)
-      - [LiveActivityState](#liveactivitystate)
-    - [Type Aliases](#type-aliases)
-      - [Record](#record)
+The demo is designed to run on real iOS devices and showcases multiple Live Activity types like delivery, timer, taxi, workout, and more.
 
-</docgen-index>
+- Launch and test various Live Activities interactively
+- Trigger updates and alert banners
+- View JSON state changes in a live log console
+
+> [!NOTE]
+> For full instructions, see [example-app/README.md](./example-app/README.md)
+
+## 🛠 API
+
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 

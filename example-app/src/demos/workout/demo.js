@@ -5,28 +5,62 @@ const log = (msg) => {
   el.textContent += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
 };
 
-// Init start-id, start-attributes, start-state
-// start-id = demo-activity
-// start-attributes = { "title": "Pizza Tracker", "orderId": "42" }
-// start-state = { "status": "Preparing", "eta": "20 min" }
-
 window.onload = () => {
-  document.getElementById("start-id").value = "demo-activity";
+  const id = "workout-001";
+
+  document.getElementById("start-id").value = id;
   document.getElementById("start-attributes").value = JSON.stringify(
-    { title: "Pizza Tracker", orderId: "42" },
+    {
+      type: "workout",
+      workoutType: "Running",
+      title: "🏃 Running Activity"
+    },
     null, 2
   );
   document.getElementById("start-state").value = JSON.stringify(
-    { status: "Preparing", eta: "20 min" },
+    {
+      distance: "2.4 km",
+      duration: "14:32",
+      pace: "6:03 min/km"
+    },
     null, 2
   );
+
+  document.getElementById("update-id").value = id;
+  document.getElementById("update-state").value = JSON.stringify(
+    {
+      distance: "3.0 km",
+      duration: "18:00",
+      pace: "6:00 min/km"
+    },
+    null, 2
+  );
+  document.getElementById("update-alert").value = JSON.stringify(
+    {
+      title: "Half time!",
+      body: "You have completed 3 km."
+    },
+    null, 2
+  );
+
+  document.getElementById("end-id").value = id;
+  document.getElementById("end-state").value = JSON.stringify(
+    {
+      distance: "5.0 km",
+      duration: "30:00",
+      pace: "6:00 min/km"
+    },
+    null, 2
+  );
+
+  document.getElementById("end-dismissal").value = "";
+  document.getElementById("status-id").value = id;
 };
 
 window.clearLog = () => {
   document.getElementById("log").textContent = "";
 };
 
-// JSON helper
 function parseJSONWithValidation(id) {
   const el = document.getElementById(id);
   const tooltipId = `${id}-tooltip`;
@@ -93,23 +127,23 @@ window.endActivity = async () => {
 
 window.checkAvailable = async () => {
   const result = await LiveActivity.isAvailable();
-  log("🔍 isAvailable: " + result);
+  log("🔍 isAvailable: " + JSON.stringify(result, null, 2));
 };
 
 window.checkRunning = async () => {
   const id = document.getElementById("status-id").value;
   const result = await LiveActivity.isRunning({ id });
-  log("🔍 isRunning: " + result);
+  log("🔍 isRunning: " + JSON.stringify(result, null, 2));
 };
 
 window.getCurrent = async () => {
-    try {
-      const id = document.getElementById("status-id").value;
-      const result = await LiveActivity.getCurrentActivity(
-        id ? { id } : undefined
-      );
-      log("📦 getCurrentActivity:\n" + JSON.stringify(result, null, 2));
-    } catch (err) {
-      log("❌ getCurrentActivity failed: " + err.message);
-    }
-  };
+  try {
+    const id = document.getElementById("status-id").value;
+    const result = await LiveActivity.getCurrentActivity(
+      id ? { id } : undefined
+    );
+    log("📦 getCurrentActivity:\n" + JSON.stringify(result, null, 2));
+  } catch (err) {
+    log("❌ getCurrentActivity failed: " + err.message);
+  }
+};

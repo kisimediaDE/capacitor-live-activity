@@ -1,68 +1,53 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <title>Live Activity Plugin Demo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Activity Demos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="stylesheet" href="./css/styles.css" />
-    <script>
-      // Dark Mode Toggle
-      const toggleTheme = () => {
-        document.documentElement.classList.toggle("dark");
-      };
-    </script>
-  </head>
-  <body>
-    <header>
-      <h1>📱 Live Activity Plugin Demo</h1>
-      <button onclick="toggleTheme()">🌓 Theme</button>
-    </header>
+    <script src="js/scripts.js" type="module"></script>
+</head>
 
-    <main>
-      <section class="card">
-        <h2>Start Activity</h2>
-        <input id="start-id" placeholder="Activity ID" />
-        <textarea id="start-attributes" placeholder='Attributes JSON'></textarea>
-        <textarea id="start-state" placeholder='Content State JSON'></textarea>
-        <button onclick="startActivity()">▶️ Start Activity</button>
-      </section>
+<body>
+    <div class="app">
+        <header class="toolbar" role="banner" aria-label="Main toolbar">
+            <div class="toolbar-inner">
+                <div class="title">
+                    <h1>📱 Live Activity Demos</h1>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">🌓</button>
+            </div>
+        </header>
 
-      <section class="card">
-        <h2>Update Activity</h2>
-        <input id="update-id" placeholder="Activity ID" />
-        <textarea id="update-state" placeholder='Content State JSON'></textarea>
-        <textarea id="update-alert" placeholder='Alert JSON (optional)'></textarea>
-        <button onclick="updateActivity()">🔄 Update Activity</button>
-      </section>
+        <main class="content" role="main">
+            <p id="intro">
+                Explore interactive Live Activity demos using <code>ActivityKit</code> and
+                <code>Capacitor</code>. Click on a demo to see it in action:
+            </p>
 
-      <section class="card">
-        <h2>End Activity</h2>
-        <input id="end-id" placeholder="Activity ID" />
-        <textarea id="end-state" placeholder='Final Content State JSON'></textarea>
-        <input id="end-dismissal" placeholder="Dismissal Timestamp (optional)" />
-        <button onclick="endActivity()">⏹ End Activity</button>
-      </section>
+            <section class="grid" aria-describedby="intro">
+                <a href="./demos/custom/demo.html" class="card" aria-label="Custom Demo – Custom Input Example">✏️ Custom
+                    Editor</a>
+                <a href="./demos/delivery/demo.html" class="card"
+                    aria-label="Delivery Demo – Delivery Tracking Example">📦 Delivery Tracker</a>
+                <a href="./demos/taxi/demo.html" class="card" aria-label="Taxi Demo – Ride Sharing Example">🚖 Taxi
+                    Tracker</a>
+                <a href="./demos/workout/demo.html" class="card" aria-label="Workout Demo – Fitness Tracking Example">🏃
+                    Workout Tracker</a>
+                <a href="./demos/eggtimer/demo.html" class="card" aria-label="Egg Timer Demo – Time Management Example">⏱
+                    Egg Timer</a>
+                <a href="./demos/food/demo.html" class="card" aria-label="Food Order Demo – Food Delivery Example">🍕 Food
+                    Order</a>
+            </section>
+        </main>
 
-      <section class="card">
-        <h2>Status & Info</h2>
-        <input id="status-id" placeholder="Activity ID for Status" />
-        <div class="button-group">
-          <button onclick="checkAvailable()">✅ isAvailable</button>
-          <button onclick="checkRunning()">🕒 isRunning</button>
-          <button onclick="getCurrent()">📦 getCurrentActivity</button>
-        </div>
-      </section>
 
-      <section class="log-section">
-        <h2>📋 Log Output</h2>
-        <pre id="log"></pre>
 
-        <div style="text-align: right; margin-top: -1rem;">
-          <button onclick="clearLog()">🧹 Clear Log</button>
-        </div>
-      </section>
-    </main>
+        <footer>
+            <small>© 2025 Kisimedia – Plugin Demo UI</small>
+        </footer>
+    </div>
+</body>
 
-    <script src="./js/example.js" type="module"></script>
-  </body>
 </html>
