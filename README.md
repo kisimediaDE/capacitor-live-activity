@@ -21,12 +21,108 @@ npx cap sync
 > This plugin **requires a Live Activity widget extension** to be present and configured in your Xcode project.  
 > Without a widget, Live Activities will not appear on the lock screen or Dynamic Island.
 
+## Widget Setup (Required)
+
+To use Live Activities, your app must include a widget extension that defines the UI for the Live Activity using ActivityKit. Without this, the Live Activity will not appear on the Lock Screen or Dynamic Island.
+
+### 1. Add a Widget Extension in Xcode
+
+1.  Open your app’s iOS project in Xcode.
+2.  Go to File > New > Target…
+3.  Choose Widget Extension.
+4.  Name it e.g. LiveActivityWidget.
+5.  Check the box “Include Live Activity”.
+6.  Finish and wait for Xcode to generate the files.
+
+### 2. Configure the Widget (Example)
+
+Make sure the widget uses the same attribute type as the plugin (e.g. GenericAttributes.swift):
+
+```swift
+import ActivityKit
+import WidgetKit
+import SwiftUI
+
+struct LiveActivityWidgetLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: GenericAttributes.self) { context in
+            // Lock Screen UI
+            VStack {
+                Text(context.state.values["title"] ?? "⏱")
+                Text(context.state.values["status"] ?? "-")
+            }
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    Text(context.state.values["title"] ?? "")
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text(context.state.values["status"] ?? "")
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text(context.state.values["message"] ?? "")
+                }
+            } compactLeading: {
+                Text("🔔")
+            } compactTrailing: {
+                Text(context.state.values["status"] ?? "")
+            } minimal: {
+                Text("🎯")
+            }
+        }
+    }
+}
+```
+
+### 3. Add GenericAttributes.swift to your Widget Target
+
+To support Live Activities with dynamic values, this plugin uses a shared Swift struct called GenericAttributes.
+
+> By default, it’s located under: Pods > CapacitorLiveActivity > Shared > GenericAttributes.swift
+
+#### To make it available in your widget extension:
+
+1. Open Xcode and go to the File Navigator.
+2. Expand Pods > CapacitorLiveActivity > Shared.
+3. Copy GenericAttributes.swift to Widget Extension Target, e.g. LiveActivityWidget
+4. Make sure to select "Copy files to destination"
+
+#### Why is this needed?
+
+Xcode doesn’t automatically include files from a CocoaPods plugin into your widget target.
+Without this step, your widget won’t compile because it cannot find GenericAttributes.
+
+### 4. Add Capability
+
+Go to your main app target → Signing & Capabilities tab and add:
+
+- Background Modes → Background fetch
+
+### 5. Ensure Inclusion in Build
+
+- In your **App target’s Info.plist**, ensure:
+
+```xml
+<key>NSSupportsLiveActivities</key>
+<true/>
+```
+
+- Clean and rebuild the project (Cmd + Shift + K, then Cmd + B).
+
 ## API
 
 <docgen-index>
 
 - [capacitor-live-activity](#capacitor-live-activity)
   - [Install](#install)
+  - [Widget Setup (Required)](#widget-setup-required)
+    - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
+    - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
+    - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
+      - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
+      - [Why is this needed?](#why-is-this-needed)
+    - [4. Add Capability](#4-add-capability)
+    - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
   - [API](#api)
     - [startActivity(...)](#startactivity)
     - [updateActivity(...)](#updateactivity)
