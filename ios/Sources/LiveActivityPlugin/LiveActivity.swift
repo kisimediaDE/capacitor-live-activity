@@ -55,7 +55,7 @@ import Foundation
                 var dismissalPolicy: ActivityUIDismissalPolicy = .default
 
                 if let dismissalTimestamp = dismissalDate {
-                    let date = Date(timeIntervalSince1970: dismissalTimestamp.doubleValue / 1000)
+                    let date = Date(timeIntervalSince1970: dismissalTimestamp.doubleValue)
                     dismissalPolicy = .after(date)
                 }
 
