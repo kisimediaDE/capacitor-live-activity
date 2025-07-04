@@ -60,12 +60,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
-        var dismissalDate: NSNumber? = nil
-
-        if let dismissalTimestamp = call.getDouble("dismissalDate") {
-            dismissalDate = NSNumber(value: dismissalTimestamp)
-        }
-
+        let dismissalDate = call.getDouble("dismissalDate").map(NSNumber.init(value:))
         Task {
             await implementation.end(id: id, content: contentState, dismissalDate: dismissalDate)
             call.resolve()
