@@ -13,18 +13,18 @@ A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
 
 ## 🧭 Table of contents
 
-<docgen-index>
-
-- [`startActivity(...)`](#startactivity)
-- [`updateActivity(...)`](#updateactivity)
-- [`endActivity(...)`](#endactivity)
-- [`isAvailable()`](#isavailable)
-- [`isRunning(...)`](#isrunning)
-- [`getCurrentActivity(...)`](#getcurrentactivity)
-- [Interfaces](#interfaces)
-- [Type Aliases](#type-aliases)
-
-</docgen-index>
+- [🧭 Table of contents](#-table-of-contents)
+- [📦 Install](#-install)
+- [🧩 Widget Setup (Required)](#-widget-setup-required)
+  - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
+  - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
+  - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
+    - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
+    - [Why is this needed?](#why-is-this-needed)
+  - [4. Add Capability](#4-add-capability)
+  - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
+- [📱 Example App](#-example-app)
+- [🛠 API](#-api)
 
 ## 📦 Install
 
@@ -142,6 +142,19 @@ The demo is designed to run on real iOS devices and showcases multiple Live Acti
 > For full instructions, see [example-app/README.md](./example-app/README.md)
 
 ## 🛠 API
+
+<docgen-index>
+
+- [`startActivity(...)`](#startactivity)
+- [`updateActivity(...)`](#updateactivity)
+- [`endActivity(...)`](#endactivity)
+- [`isAvailable()`](#isavailable)
+- [`isRunning(...)`](#isrunning)
+- [`getCurrentActivity(...)`](#getcurrentactivity)
+- [Interfaces](#interfaces)
+- [Type Aliases](#type-aliases)
+
+</docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
