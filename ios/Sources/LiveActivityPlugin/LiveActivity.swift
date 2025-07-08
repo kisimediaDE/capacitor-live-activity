@@ -48,11 +48,22 @@ import Foundation
             }
     }
 
-    @objc public func end(id: String, content: [String: String]) async {
+    @objc public func end(id: String, content: [String: String], dismissalDate: NSNumber?) async {
             if let activity = activities[id] {
                 let state = GenericAttributes.ContentState(values: content)
+                
+                var dismissalPolicy: ActivityUIDismissalPolicy = .default
+
+                if let dismissalTimestamp = dismissalDate {
+                    let date = Date(timeIntervalSince1970: dismissalTimestamp.doubleValue)
+                    dismissalPolicy = .after(date)
+                }
+
                 await activity.end(
-                    ActivityContent(state: state, staleDate: nil), dismissalPolicy: .default)
+                    ActivityContent(state: state, staleDate: nil),
+                    dismissalPolicy: dismissalPolicy
+                )
+                
                 activities.removeValue(forKey: id)
             }
     }
