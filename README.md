@@ -145,14 +145,14 @@ The demo is designed to run on real iOS devices and showcases multiple Live Acti
 
 <docgen-index>
 
-- [`startActivity(...)`](#startactivity)
-- [`updateActivity(...)`](#updateactivity)
-- [`endActivity(...)`](#endactivity)
-- [`isAvailable()`](#isavailable)
-- [`isRunning(...)`](#isrunning)
-- [`getCurrentActivity(...)`](#getcurrentactivity)
-- [Interfaces](#interfaces)
-- [Type Aliases](#type-aliases)
+* [`startActivity(...)`](#startactivity)
+* [`updateActivity(...)`](#updateactivity)
+* [`endActivity(...)`](#endactivity)
+* [`isAvailable()`](#isavailable)
+* [`isRunning(...)`](#isrunning)
+* [`getCurrentActivity(...)`](#getcurrentactivity)
+* [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -173,7 +173,8 @@ Starts a new Live Activity on iOS using the provided options.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### updateActivity(...)
 
@@ -189,7 +190,8 @@ Updates the currently active Live Activity.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### endActivity(...)
 
@@ -205,7 +207,8 @@ Ends the Live Activity and optionally provides a final state and dismissal polic
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### isAvailable()
 
@@ -219,7 +222,8 @@ Returns whether Live Activities are available on this device and allowed by the 
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### isRunning(...)
 
@@ -237,7 +241,8 @@ Returns true if a Live Activity with the given ID is currently running.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### getCurrentActivity(...)
 
@@ -258,9 +263,11 @@ If no ID is given, returns the most recently started activity.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### Interfaces
+
 
 #### StartActivityOptions
 
@@ -273,6 +280,7 @@ Options for starting a Live Activity.
 | **`contentState`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Initial content state (dynamic values).                   |
 | **`timestamp`**    | <code>number</code>                                             | Optional timestamp (Unix) when the Live Activity started. |
 
+
 #### UpdateActivityOptions
 
 Options for updating a Live Activity.
@@ -284,6 +292,7 @@ Options for updating a Live Activity.
 | **`alert`**        | <code><a href="#alertconfiguration">AlertConfiguration</a></code> | Optional alert configuration to show a notification banner or Apple Watch alert. |
 | **`timestamp`**    | <code>number</code>                                               | Optional timestamp (Unix) when the update occurred.                              |
 
+
 #### AlertConfiguration
 
 Configuration for alert notifications.
@@ -293,6 +302,7 @@ Configuration for alert notifications.
 | **`title`** | <code>string</code> | Optional title of the alert.           |
 | **`body`**  | <code>string</code> | Optional body text of the alert.       |
 | **`sound`** | <code>string</code> | Optional sound file name or "default". |
+
 
 #### EndActivityOptions
 
@@ -304,6 +314,7 @@ Options for ending a Live Activity.
 | **`contentState`**  | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Final state to show before dismissal.                                                  |
 | **`timestamp`**     | <code>number</code>                                             | Optional timestamp (Unix) when the end occurred.                                       |
 | **`dismissalDate`** | <code>number</code>                                             | Optional dismissal time in the future (Unix). If not provided, system default applies. |
+
 
 #### LiveActivityState
 
@@ -317,14 +328,14 @@ Represents an active Live Activity state.
 | **`isEnded`**   | <code>boolean</code>                                            | Whether the activity has ended.                 |
 | **`startedAt`** | <code>string</code>                                             | ISO string timestamp when the activity started. |
 
+
 ### Type Aliases
+
 
 #### Record
 
 Construct a type with a set of properties K of type T
 
-<code>{
- [P in K]: T;
- }</code>
+<code>{ [P in K]: T; }</code>
 
 </docgen-api>
