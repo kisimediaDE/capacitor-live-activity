@@ -15,33 +15,14 @@ A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
 
 <docgen-index>
 
-- [📡 capacitor-live-activity](#-capacitor-live-activity)
-  - [🧭 Table of contents](#-table-of-contents)
-  - [📦 Install](#-install)
-  - [🧩 Widget Setup (Required)](#-widget-setup-required)
-    - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
-    - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
-    - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
-      - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
-      - [Why is this needed?](#why-is-this-needed)
-    - [4. Add Capability](#4-add-capability)
-    - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
-  - [📱 Example App](#-example-app)
-  - [🛠 API](#-api)
-    - [startActivity(...)](#startactivity)
-    - [updateActivity(...)](#updateactivity)
-    - [endActivity(...)](#endactivity)
-    - [isAvailable()](#isavailable)
-    - [isRunning(...)](#isrunning)
-    - [getCurrentActivity(...)](#getcurrentactivity)
-    - [Interfaces](#interfaces)
-      - [StartActivityOptions](#startactivityoptions)
-      - [UpdateActivityOptions](#updateactivityoptions)
-      - [AlertConfiguration](#alertconfiguration)
-      - [EndActivityOptions](#endactivityoptions)
-      - [LiveActivityState](#liveactivitystate)
-    - [Type Aliases](#type-aliases)
-      - [Record](#record)
+- [`startActivity(...)`](#startactivity)
+- [`updateActivity(...)`](#updateactivity)
+- [`endActivity(...)`](#endactivity)
+- [`isAvailable()`](#isavailable)
+- [`isRunning(...)`](#isrunning)
+- [`getCurrentActivity(...)`](#getcurrentactivity)
+- [Interfaces](#interfaces)
+- [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -116,7 +97,7 @@ struct LiveActivityWidgetLiveActivity: Widget {
 
 To support Live Activities with dynamic values, this plugin uses a shared Swift struct called GenericAttributes.
 
-> By default, it’s located under: Pods > CapacitorLiveActivity > Shared > GenericAttributes.swift
+> By default, it’s located under: Pods > CapacitorLiveActivity > LiveActivityPlugin > Shared > GenericAttributes.swift
 
 #### To make it available in your widget extension:
 
