@@ -11,6 +11,11 @@ Minimal Node/TS server to send **Live Activity** pushes via **Firebase Cloud Mes
 - Your app must collect:
   - **FCM registration token** (per device)
   - **Live Activity push token** (per activity) or **push-to-start token** (global) from ActivityKit/your plugin
+- APNs headers for Live Activities:
+  - apns-push-type: liveactivity
+  - apns-topic: <APP_BUNDLE_ID>.push-type.liveactivity
+  - apns-priority: 10
+  - For FCM: use `apns.liveActivityToken` with the per-activity token or push-to-start token.
 
 ## Setup
 

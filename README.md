@@ -13,18 +13,47 @@ A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.
 
 ## 🧭 Table of contents
 
-- [🧭 Table of contents](#-table-of-contents)
-- [📦 Install](#-install)
-- [🧩 Widget Setup (Required)](#-widget-setup-required)
-  - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
-  - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
-  - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
-    - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
-    - [Why is this needed?](#why-is-this-needed)
-  - [4. Add Capability](#4-add-capability)
-  - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
-- [📱 Example App](#-example-app)
-- [🛠 API](#-api)
+- [📡 capacitor-live-activity](#-capacitor-live-activity)
+  - [🧭 Table of contents](#-table-of-contents)
+  - [📦 Install](#-install)
+  - [🧩 Widget Setup (Required)](#-widget-setup-required)
+    - [1. Add a Widget Extension in Xcode](#1-add-a-widget-extension-in-xcode)
+    - [2. Configure the Widget (Example)](#2-configure-the-widget-example)
+    - [3. Add GenericAttributes.swift to your Widget Target](#3-add-genericattributesswift-to-your-widget-target)
+      - [To make it available in your widget extension:](#to-make-it-available-in-your-widget-extension)
+      - [Why is this needed?](#why-is-this-needed)
+    - [4. Add Capability](#4-add-capability)
+    - [5. Ensure Inclusion in Build](#5-ensure-inclusion-in-build)
+  - [🧠 Platform behavior](#-platform-behavior)
+  - [📱 Example App](#-example-app)
+  - [🛠 API](#-api)
+    - [startActivity(...)](#startactivity)
+    - [startActivityWithPush(...)](#startactivitywithpush)
+    - [updateActivity(...)](#updateactivity)
+    - [endActivity(...)](#endactivity)
+    - [isAvailable()](#isavailable)
+    - [isRunning(...)](#isrunning)
+    - [getCurrentActivity(...)](#getcurrentactivity)
+    - [listActivities()](#listactivities)
+    - [observePushToStartToken()](#observepushtostarttoken)
+    - [addListener('liveActivityPushToken', ...)](#addlistenerliveactivitypushtoken-)
+    - [addListener('liveActivityPushToStartToken', ...)](#addlistenerliveactivitypushtostarttoken-)
+    - [addListener('liveActivityUpdate', ...)](#addlistenerliveactivityupdate-)
+    - [Interfaces](#interfaces)
+      - [StartActivityOptions](#startactivityoptions)
+      - [UpdateActivityOptions](#updateactivityoptions)
+      - [AlertConfiguration](#alertconfiguration)
+      - [EndActivityOptions](#endactivityoptions)
+      - [LiveActivityState](#liveactivitystate)
+      - [ListActivitiesResult](#listactivitiesresult)
+      - [Array](#array)
+      - [ConcatArray](#concatarray)
+      - [PluginListenerHandle](#pluginlistenerhandle)
+      - [PushTokenEvent](#pushtokenevent)
+      - [PushToStartTokenEvent](#pushtostarttokenevent)
+      - [ActivityUpdateEvent](#activityupdateevent)
+    - [Type Aliases](#type-aliases)
+      - [Record](#record)
 
 ## 📦 Install
 
@@ -116,6 +145,9 @@ Without this step, your widget won’t compile because it cannot find GenericAtt
 Go to your main app target → Signing & Capabilities tab and add:
 
 - Background Modes → Background fetch
+- Go to your app target → Signing & Capabilities:
+  - ✅ Push Notifications
+  - ✅ Live Activities
 
 ### 5. Ensure Inclusion in Build
 
@@ -127,6 +159,13 @@ Go to your main app target → Signing & Capabilities tab and add:
 ```
 
 - Clean and rebuild the project (Cmd + Shift + K, then Cmd + B).
+
+## 🧠 Platform behavior
+
+- iOS 16.2+: Live Activities (local start/update/end)
+- iOS 17.2+: Remote start via push (push-to-start) and per-activity push updates
+- Real device required (no Simulator)
+- For remote flows, test with the app in background/terminated
 
 ## 📱 Example App
 
