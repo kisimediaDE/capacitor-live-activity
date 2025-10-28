@@ -243,14 +243,14 @@ Optionally provide a final state and a dismissal policy.
 ### isAvailable()
 
 ```typescript
-isAvailable() => Promise<boolean>
+isAvailable() => Promise<{ value: boolean; }>
 ```
 
 Return whether Live Activities are enabled and allowed on this device.
 
 **Note:** This method resolves to `{ value: boolean }` to match native.
 
-**Returns:** <code>Promise&lt;boolean&gt;</code>
+**Returns:** <code>Promise&lt;{ value: boolean; }&gt;</code>
 
 **Since:** 0.0.1
 
@@ -260,7 +260,7 @@ Return whether Live Activities are enabled and allowed on this device.
 ### isRunning(...)
 
 ```typescript
-isRunning(options: { id: string; }) => Promise<boolean>
+isRunning(options: { id: string; }) => Promise<{ value: boolean; }>
 ```
 
 Return whether a Live Activity with the given logical `id` is currently running.
@@ -271,7 +271,7 @@ Return whether a Live Activity with the given logical `id` is currently running.
 | ------------- | ---------------------------- |
 | **`options`** | <code>{ id: string; }</code> |
 
-**Returns:** <code>Promise&lt;boolean&gt;</code>
+**Returns:** <code>Promise&lt;{ value: boolean; }&gt;</code>
 
 **Since:** 0.0.1
 

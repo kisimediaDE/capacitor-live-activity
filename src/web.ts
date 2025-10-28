@@ -25,14 +25,14 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
     console.warn('LiveActivity: endActivity is only available on iOS.');
   }
 
-  async isAvailable(): Promise<boolean> {
+  async isAvailable(): Promise<{ value: boolean }> {
     console.warn('LiveActivity: isAvailable is only available on iOS.');
-    return false;
+    return { value: false };
   }
 
-  async isRunning(_options: { id: string }): Promise<boolean> {
+  async isRunning(_options: { id: string }): Promise<{ value: boolean }> {
     console.warn('LiveActivity: isRunning is only available on iOS.');
-    return false;
+    return { value: false };
   }
 
   async getCurrentActivity(): Promise<LiveActivityState | undefined> {
