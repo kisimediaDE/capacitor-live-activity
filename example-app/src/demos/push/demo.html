@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔔 Push & Remote Start</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="stylesheet" href="./demo.css" />
+  <link rel="stylesheet" href="../../css/styles.css" />
+  <script src="./demo.js" type="module"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="toolbar" role="banner" aria-label="Push Demo Toolbar">
+      <div class="toolbar-inner">
+        <a href="../../index.html" class="back-button" aria-label="Go back to overview">← Back</a>
+        <div class="title"><h1>🔔 Push & Remote Start</h1></div>
+        <div style="width:40px;"></div>
+      </div>
+    </header>
+
+    <main class="content" role="main">
+      <section class="card">
+        <h2>Device & Server</h2>
+        <input id="base-url" placeholder="Server Base URL" />
+        <div class="button-group" style="margin-top:.5rem">
+          <button onclick="saveBaseUrl()">💾 Save URL</button>
+          <button onclick="ping()">📡 Ping (FCM alert)</button>
+        </div>
+        <small>Note: Don't use <code>localhost</code> on your device, use the IP address of your computer, e.g. <code>http://192.168.178.20:3000</code> instead.</small>
+      </section>
+
+      <section class="card">
+        <h2>Tokens</h2>
+        <div class="button-group">
+          <button onclick="requestPerms()">✅ Request Notification Permission</button>
+          <button onclick="getFcm()">🎟️ Get FCM Token</button>
+          <button onclick="observeP2S()">🔑 Observe Push-to-Start Token</button>
+          <button onclick="observeActivityTokens()">🧩 Observe Activity Push Tokens</button>
+        </div>
+        <textarea id="fcm" placeholder="FCM Token"></textarea>
+        <textarea id="p2s" placeholder="Push-to-Start Token (hex)"></textarea>
+        <textarea id="push" placeholder="Activity Push Token (hex; per Activity)"></textarea>
+      </section>
+
+      <section class="card">
+        <h2>Remote Start (iOS 17.2+)</h2>
+        <details>
+          <summary>📝 JSON</summary>
+          <input id="attributes-type" placeholder='attributes-type (z. B. "LiveActivityWidgetExtension.GenericAttributes")' />
+          <textarea id="attrs" placeholder="attributes JSON"></textarea>
+          <textarea id="content" placeholder="content-state JSON"></textarea>
+          <textarea id="alert" placeholder='alert JSON (optional) {"title":"...","body":"..."}'></textarea>
+        </details>
+        <button onclick="remoteStart()">▶️ Remote Start</button>
+      </section>
+
+      <section class="card">
+        <h2>Remote Update / End (per-Activity Push Token)</h2>
+        <details>
+          <summary>📝 JSON</summary>
+          <textarea id="upd" placeholder="update content-state JSON"></textarea>
+          <textarea id="updAlert" placeholder="update alert JSON (optional)"></textarea>
+          <input id="dismissal" placeholder="end dismissal-date (unix seconds, optional)" />
+          <textarea id="endState" placeholder="end content-state JSON (optional)"></textarea>
+        </details>
+        <div class="button-group">
+          <button onclick="remoteUpdate()">🔄 Remote Update</button>
+          <button onclick="remoteEnd()">⏹ Remote End</button>
+        </div>
+      </section>
+
+      <section class="log-section">
+        <h2>📋 Log Output</h2>
+        <pre id="log"></pre>
+        <div style="text-align:right;margin-top:-1rem">
+          <button onclick="clearLog()">🧹 Clear Log</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

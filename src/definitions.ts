@@ -55,7 +55,7 @@ export interface LiveActivityPlugin {
    * @since 0.0.1
    * @platform iOS
    */
-  isAvailable(): Promise<boolean>; // NOTE: native currently returns { value: boolean }
+  isAvailable(): Promise<{ value: boolean }>; // NOTE: native currently returns { value: boolean }
 
   /**
    * Return whether a Live Activity with the given logical `id` is currently running.
@@ -66,7 +66,7 @@ export interface LiveActivityPlugin {
    * @since 0.0.1
    * @platform iOS
    */
-  isRunning(options: { id: string }): Promise<boolean>; // NOTE: native currently returns { value: boolean }
+  isRunning(options: { id: string }): Promise<{ value: boolean }>; // NOTE: native currently returns { value: boolean }
 
   /**
    * Get the current Live Activity state.
