@@ -1,4 +1,6 @@
 // web.ts
+// Web shim: exposes the same API with no-ops for non-iOS platforms.
+
 import { WebPlugin } from '@capacitor/core';
 import type {
   LiveActivityPlugin,
@@ -6,9 +8,11 @@ import type {
   UpdateActivityOptions,
   EndActivityOptions,
   LiveActivityState,
+  ListActivitiesResult,
 } from './definitions';
 
 export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
+  // ---- Local APIs ----
   async startActivity(_options: StartActivityOptions): Promise<void> {
     console.warn('LiveActivity: startActivity is only available on iOS.');
   }
@@ -34,5 +38,20 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
   async getCurrentActivity(): Promise<LiveActivityState | undefined> {
     console.warn('LiveActivity: getCurrentActivity is only available on iOS.');
     return undefined;
+  }
+
+  // ---- Push-capable APIs ----
+  async startActivityWithPush(_options: StartActivityOptions): Promise<{ activityId: string }> {
+    console.warn('[LiveActivity] startActivityWithPush is only available on iOS.');
+    return { activityId: '' };
+  }
+
+  async listActivities(): Promise<ListActivitiesResult> {
+    console.warn('[LiveActivity] listActivities is only available on iOS.');
+    return { items: [] };
+  }
+
+  async observePushToStartToken(): Promise<void> {
+    console.warn('[LiveActivity] observePushToStartToken is only available on iOS.');
   }
 }

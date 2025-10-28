@@ -70,10 +70,17 @@
 			);
 			target = AF7FE8F52DF468B1004A6D34 /* LiveActivityWidgetExtension */;
 		};
+		AFD1E63E2EB0CD6E00C0ADB8 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				GenericAttributes.swift,
+			);
+			target = 504EC3031FED79650016851F /* App */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AF7FE8FB2DF468B1004A6D34 /* LiveActivityWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AF7FE90B2DF468B2004A6D34 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = LiveActivityWidget; sourceTree = "<group>"; };
+		AF7FE8FB2DF468B1004A6D34 /* LiveActivityWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (AFD1E63E2EB0CD6E00C0ADB8 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, AF7FE90B2DF468B2004A6D34 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = LiveActivityWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */

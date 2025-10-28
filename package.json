@@ -1,6 +1,6 @@
 {
   "name": "capacitor-live-activity",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "description": "A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
