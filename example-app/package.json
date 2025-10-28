@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@capacitor/core": "latest",
-    "@capacitor/ios": "^7.3.0",
+    "@capacitor/ios": "^7.4.4",
     "capacitor-live-activity": "file:.."
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
     "fast-glob": "^3.3.3",
-    "vite": "^6.3.5"
+    "vite": "^7.1.12"
   },
   "author": "",
   "license": "ISC"
