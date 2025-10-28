@@ -1,6 +1,6 @@
 {
   "name": "capacitor-live-activity",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "description": "A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -47,19 +47,19 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@capacitor/core": "^7.4.1",
+    "@capacitor/core": "^7.4.4",
     "@capacitor/docgen": "^0.3.0",
-    "@capacitor/ios": "^7.4.1",
+    "@capacitor/ios": "^7.4.4",
     "@ionic/eslint-config": "^0.4.0",
     "@ionic/prettier-config": "^4.0.0",
     "@ionic/swiftlint-config": "^2.0.0",
     "eslint": "^8.57.1",
     "prettier": "^3.6.2",
-    "prettier-plugin-java": "^2.7.1",
+    "prettier-plugin-java": "^2.7.7",
     "rimraf": "^6.0.1",
-    "rollup": "^4.44.2",
+    "rollup": "^4.52.5",
     "swiftlint": "^2.0.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@capacitor/core": ">=7.0.0"

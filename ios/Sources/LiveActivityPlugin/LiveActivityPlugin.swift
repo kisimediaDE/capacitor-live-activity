@@ -9,14 +9,22 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "startActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "startActivityWithPush", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "isAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "isRunning", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getCurrentActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "listActivities", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "observePushToStartToken", returnType: CAPPluginReturnPromise),
     ]
 
     private let implementation = LiveActivity()
+
+    public override func load() {
+        super.load()
+        implementation.plugin = self
+    }
 
     @objc func startActivity(_ call: CAPPluginCall) {
         guard let id = call.getString("id"),
@@ -34,6 +42,23 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
                 call.resolve()
             } catch {
                 call.reject("Failed to start activity: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @objc func startActivityWithPush(_ call: CAPPluginCall) {
+        let id = call.getString("id") ?? UUID().uuidString
+        let attributes = call.getObject("attributes") as? [String: String] ?? [:]
+        let contentState = call.getObject("contentState") as? [String: String] ?? [:]
+
+        Task {
+            do {
+                let activityId = try await implementation.startActivityWithPush(
+                    id, attributes: attributes, content: contentState
+                )
+                call.resolve(["activityId": activityId])
+            } catch {
+                call.reject("startActivityWithPush failed: \(error.localizedDescription)")
             }
         }
     }
@@ -89,7 +114,21 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         if let result = result {
             call.resolve(result)
         } else {
-            call.resolve([:])  // oder call.reject("No active activity found") falls erwünscht
+            call.resolve([:])  // oder call.reject("No active activity found")
+        }
+    }
+
+    @objc func listActivities(_ call: CAPPluginCall) {
+        let items = implementation.listActivities()
+        call.resolve(["items": items])
+    }
+
+    @objc func observePushToStartToken(_ call: CAPPluginCall) {
+        if #available(iOS 17.2, *) {
+            implementation.observePushToStartToken()
+            call.resolve()
+        } else {
+            call.reject("observePushToStartToken requires iOS 17.2+")
         }
     }
 }

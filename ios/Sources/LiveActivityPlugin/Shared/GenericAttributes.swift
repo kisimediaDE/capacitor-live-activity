@@ -1,13 +1,18 @@
 import ActivityKit
 import Foundation
 
-struct GenericAttributes: ActivityAttributes {
-    public typealias ContentState = State
-
-    public struct State: Codable, Hashable {
-        var values: [String: String]
+@available(iOS 16.2, *)
+public struct GenericAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        public var values: [String: String]
+        public init(values: [String: String]) { self.values = values }
     }
 
-    var id: String
-    var staticValues: [String: String]
+    public var id: String
+    public var staticValues: [String: String]
+
+    public init(id: String, staticValues: [String: String]) {
+        self.id = id
+        self.staticValues = staticValues
+    }
 }
