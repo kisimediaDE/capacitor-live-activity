@@ -50,7 +50,7 @@ jobs:
 
   validate-ios:
     name: Validate (iOS)
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v4
