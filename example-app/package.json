@@ -13,16 +13,16 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@capacitor-firebase/messaging": "^8.0.1",
-		"@capacitor/core": "^8.0.1",
-		"@capacitor/ios": "^8.0.1",
+		"@capacitor-firebase/messaging": "^8.2.0",
+		"@capacitor/core": "^8.4.0",
+		"@capacitor/ios": "^8.4.0",
 		"capacitor-live-activity": "file:..",
-		"firebase": "^12.8.0"
+		"firebase": "^12.14.0"
 	},
 	"devDependencies": {
-		"@capacitor/cli": "^8.0.1",
+		"@capacitor/cli": "^8.4.0",
 		"fast-glob": "^3.3.3",
-		"vite": "^7.3.1"
+		"vite": "^7.3.5"
 	},
 	"author": "",
 	"license": "ISC"
