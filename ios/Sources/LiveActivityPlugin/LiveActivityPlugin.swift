@@ -122,9 +122,15 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        let dismissalPolicy = call.getString("dismissalPolicy")
         let dismissalDate = call.getDouble("dismissalDate").map(NSNumber.init(value:))
         Task {
-            await implementation.end(id: id, content: contentState, dismissalDate: dismissalDate)
+            await implementation.end(
+                id: id,
+                content: contentState,
+                dismissalPolicy: dismissalPolicy,
+                dismissalDate: dismissalDate
+            )
             call.resolve()
         }
     }

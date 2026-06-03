@@ -78,6 +78,11 @@
             <summary>📝 Show JSON Input</summary>
             <input id="end-id" placeholder="Activity ID" />
             <textarea id="end-state" placeholder='Final Content State JSON'></textarea>
+            <select id="end-dismissal-policy">
+              <option value="">System Default</option>
+              <option value="immediate">Immediate</option>
+              <option value="after">After Dismissal Timestamp</option>
+            </select>
             <input id="end-dismissal" placeholder="Dismissal Timestamp (optional)" />
           </details>
           <button onclick="endActivity()">⏹ End Activity</button>

@@ -59,6 +59,7 @@ function buildApsPayload(params: {
   attributes?: Record<string, unknown>;
   alert?: { title?: string; body?: string; sound?: string };
   timestamp?: number; // seconds since epoch
+  dismissalPolicy?: 'default' | 'immediate' | 'after';
   dismissalDate?: number; // seconds since epoch (for 'end')
 }) {
   const {
@@ -68,6 +69,7 @@ function buildApsPayload(params: {
     attributes,
     alert,
     timestamp = Math.floor(Date.now() / 1000),
+    dismissalPolicy,
     dismissalDate,
   } = params;
   const aps: Record<string, unknown> = { timestamp, event };
@@ -77,7 +79,13 @@ function buildApsPayload(params: {
     if (attributesType) aps['attributes-type'] = attributesType;
     if (attributes) aps['attributes'] = attributes;
   }
-  if (event === 'end' && typeof dismissalDate === 'number') {
+  if (event === 'end' && dismissalPolicy === 'immediate') {
+    aps['dismissal-date'] = timestamp - 1;
+  } else if (
+    event === 'end' &&
+    (dismissalPolicy === 'after' || dismissalPolicy === undefined) &&
+    typeof dismissalDate === 'number'
+  ) {
     aps['dismissal-date'] = dismissalDate;
   }
   return aps;
@@ -229,6 +237,7 @@ const EndSchema = z.object({
     })
     .optional(),
   dismissalDate: z.number().optional(),
+  dismissalPolicy: z.enum(['default', 'immediate', 'after']).optional(),
   timestamp: z.number().optional(),
 });
 
@@ -244,6 +253,7 @@ app.post('/live-activity/end', async (req, res) => {
       contentState: data.contentState,
       alert: data.alert,
       timestamp: data.timestamp,
+      dismissalPolicy: data.dismissalPolicy,
       dismissalDate: data.dismissalDate,
     });
     logObj('Built FCM aps payload', aps);

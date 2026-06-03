@@ -100,11 +100,15 @@ final class LiveActivityPluginTests: XCTestCase {
                 throw XCTSkip("ActivityKit request nicht erlaubt in dieser Umgebung: \(error)")
             }
 
-            // ❗️Signatur hat dismissalDate: NSNumber? – hier nil übergeben
-            await plugin.end(id: id, content: content, dismissalDate: nil)
+            await plugin.end(
+                id: id,
+                content: content,
+                dismissalPolicy: "immediate",
+                dismissalDate: nil
+            )
 
             let current = plugin.getCurrent(id: id)
-            XCTAssertNil(current, "Activity sollte nach end() entfernt sein")
+            XCTAssertNil(current, "Activity sollte nach end(immediate) entfernt sein")
         } else {
             throw XCTSkip("iOS < 16.2")
         }
@@ -125,7 +129,7 @@ final class LiveActivityPluginTests: XCTestCase {
                 throw XCTSkip("ActivityKit request nicht erlaubt in dieser Umgebung: \(error)")
             }
             XCTAssertTrue(plugin.isRunning(id: id))
-            await plugin.end(id: id, content: content, dismissalDate: nil)
+            await plugin.end(id: id, content: content, dismissalPolicy: nil, dismissalDate: nil)
             XCTAssertFalse(plugin.isRunning(id: id))
         } else {
             throw XCTSkip("iOS < 16.2")

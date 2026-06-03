@@ -19,17 +19,16 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                 let id = activity.attributes.id
 
                 switch activity.activityState {
-                case .active, .stale, .pending:
+                case .active, .stale, .pending, .ended:
                     activities[id] = activity
-                case .ended, .dismissed:
-                    /// No action: ignore ended/dismissed activities (cleanup)
-                    print("🧹 Ignored ended activity: \(id)")
+                case .dismissed:
+                    print("🧹 Ignored dismissed activity: \(id)")
                 @unknown default:
                     print("⚠️ Unknown state for activity: \(id)")
                 }
             }
 
-            print("✅ Init complete. Active activities: \(activities.count)")
+            print("✅ Init complete. Known activities: \(activities.count)")
             self.observeActivityUpdates()
         }
     }
@@ -149,15 +148,25 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         }
     }
 
-    @objc public func end(id: String, content: [String: String], dismissalDate: NSNumber?) async {
+    @objc public func end(
+        id: String,
+        content: [String: String],
+        dismissalPolicy policy: String?,
+        dismissalDate: NSNumber?
+    ) async {
         if let activity = activities[id] {
             let state = GenericAttributes.ContentState(values: content)
 
-            var dismissalPolicy: ActivityUIDismissalPolicy = .default
-
-            if let dismissalTimestamp = dismissalDate {
+            let dismissesImmediately = policy == "immediate"
+            let dismissesAfterDate = policy == "after" || policy == nil
+            let dismissalPolicy: ActivityUIDismissalPolicy
+            if dismissesImmediately {
+                dismissalPolicy = .immediate
+            } else if dismissesAfterDate, let dismissalTimestamp = dismissalDate {
                 let date = Date(timeIntervalSince1970: dismissalTimestamp.doubleValue)
                 dismissalPolicy = .after(date)
+            } else {
+                dismissalPolicy = .default
             }
 
             await activity.end(
@@ -165,12 +174,29 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                 dismissalPolicy: dismissalPolicy
             )
 
-            activities.removeValue(forKey: id)
+            if dismissesImmediately {
+                activities.removeValue(forKey: id)
+            } else {
+                activities[id] = activity
+            }
         }
     }
 
     @objc public func isRunning(id: String) -> Bool {
-        return activities[id] != nil
+        guard let activity = activities[id] else { return false }
+
+        return isRunningActivity(activity)
+    }
+
+    private func isRunningActivity(_ activity: Activity<GenericAttributes>) -> Bool {
+        switch activity.activityState {
+        case .active, .stale, .pending:
+            return true
+        case .ended, .dismissed:
+            return false
+        @unknown default:
+            return false
+        }
     }
 
     @objc public func getCurrent(id: String?) -> [String: Any]? {
@@ -179,10 +205,11 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         if let id = id {
             activity = activities[id]
         } else {
-            activity = activities.values.first
+            activity = activities.values.first { isRunningActivity($0) }
         }
 
         guard let a = activity else { return nil }
+        guard isRunningActivity(a) else { return nil }
 
         return [
             "id": a.id,
@@ -197,9 +224,9 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         Task { [weak self] in
             for await a in Activity<GenericAttributes>.activityUpdates {
                 switch a.activityState {
-                case .active, .stale, .pending:
+                case .active, .stale, .pending, .ended:
                     self?.activities[a.attributes.id] = a
-                case .ended, .dismissed:
+                case .dismissed:
                     self?.activities.removeValue(forKey: a.attributes.id)
                 @unknown default:
                     break

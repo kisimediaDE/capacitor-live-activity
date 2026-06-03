@@ -53,6 +53,7 @@ window.onload = () => {
     null, 2
   );
 
+  document.getElementById("end-dismissal-policy").value = "";
   document.getElementById("end-dismissal").value = "";
   document.getElementById("status-id").value = id;
 };
@@ -112,11 +113,13 @@ window.endActivity = async () => {
   try {
     const id = document.getElementById("end-id").value;
     const contentState = parseJSONWithValidation("end-state");
+    const dismissalPolicy = document.getElementById("end-dismissal-policy").value;
     const dismissalDate = document.getElementById("end-dismissal").value;
 
     await LiveActivity.endActivity({
       id,
       contentState,
+      dismissalPolicy: dismissalPolicy || undefined,
       dismissalDate: dismissalDate ? parseInt(dismissalDate) : undefined,
     });
     log("✅ endActivity successful");

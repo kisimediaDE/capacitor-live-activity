@@ -78,6 +78,7 @@
   }
 
   input,
+select,
 textarea {
   font-size: 1rem; /* bleibt dann bei 14px */
   -webkit-text-size-adjust: 100%;

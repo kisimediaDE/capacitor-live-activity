@@ -60,6 +60,11 @@
           <summary>📝 JSON</summary>
           <textarea id="upd" placeholder="update content-state JSON"></textarea>
           <textarea id="updAlert" placeholder="update alert JSON (optional)"></textarea>
+          <select id="dismissal-policy">
+            <option value="">System Default</option>
+            <option value="immediate">Immediate</option>
+            <option value="after">After Dismissal Timestamp</option>
+          </select>
           <input id="dismissal" placeholder="end dismissal-date (unix seconds, optional)" />
           <textarea id="endState" placeholder="end content-state JSON (optional)"></textarea>
         </details>

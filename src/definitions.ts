@@ -276,9 +276,20 @@ export interface EndActivityOptions {
 
   /**
    * Optional future dismissal time (UNIX).
-   * If omitted, the system default dismissal policy applies.
+   * If provided without `dismissalPolicy`, the `after` dismissal policy applies.
    */
   dismissalDate?: number;
+
+  /**
+   * Optional dismissal policy.
+   * - `default`: the system default dismissal behavior.
+   * - `immediate`: dismiss the Live Activity immediately after ending it.
+   * - `after`: dismiss the Live Activity after `dismissalDate`.
+   *
+   * If omitted, `dismissalDate` still maps to `after` for backward compatibility;
+   * otherwise the system default dismissal policy applies.
+   */
+  dismissalPolicy?: 'default' | 'immediate' | 'after';
 }
 
 /**
