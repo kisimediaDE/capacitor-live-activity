@@ -65,7 +65,7 @@ window.onload = () => {
     null, 2
   );
 
-  document.getElementById("end-dismissal-policy").value = "";
+  document.getElementById("end-dismissal-policy").value = "default";
   document.getElementById("end-dismissal").value = "";
   document.getElementById("status-id").value = id;
 

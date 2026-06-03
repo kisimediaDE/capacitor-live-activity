@@ -25,7 +25,7 @@ window.onload = () => {
 
   $('upd').value = JSON.stringify({ status: 'On the way', eta: '5 min' }, null, 2);
   $('updAlert').value = JSON.stringify({ title: 'Update', body: 'Almost there' }, null, 2);
-  $('dismissal-policy').value = '';
+  $('dismissal-policy').value = 'default';
   $('endState').value = JSON.stringify({ status: 'Delivered', eta: 'Now' }, null, 2);
 };
 
