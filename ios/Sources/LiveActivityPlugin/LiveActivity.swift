@@ -202,15 +202,15 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
     }
 
     @objc public func getCurrent(id: String?) -> [String: Any]? {
-        var activity: Activity<GenericAttributes>?
+        var selectedActivity: Activity<GenericAttributes>?
 
         if let id = id {
-            activity = activity(for: id)
+            selectedActivity = activity(for: id)
         } else {
-            activity = firstRunningActivity()
+            selectedActivity = firstRunningActivity()
         }
 
-        guard let a = activity else { return nil }
+        guard let a = selectedActivity else { return nil }
         guard isRunningActivity(a) else { return nil }
 
         return [
@@ -254,7 +254,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 
     private func removeActivity(for id: String) {
         activitiesQueue.sync {
-            activities.removeValue(forKey: id)
+            _ = activities.removeValue(forKey: id)
         }
     }
 
