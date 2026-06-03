@@ -217,7 +217,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
             "id": a.id,
             "values": a.content.state.values,
             "isStale": a.content.staleDate != nil,
-            "isEnded": false,
+            "isEnded": a.activityState == .ended,
             "startedAt": a.content.state.values["startedAt"] ?? "",
         ]
     }
