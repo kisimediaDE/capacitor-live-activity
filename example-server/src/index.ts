@@ -62,13 +62,14 @@ function buildApsPayload(params: {
   dismissalPolicy?: 'default' | 'immediate' | 'after';
   dismissalDate?: number; // seconds since epoch (for 'end')
 }) {
+  const now = Math.floor(Date.now() / 1000);
   const {
     event,
     contentState,
     attributesType,
     attributes,
     alert,
-    timestamp = Math.floor(Date.now() / 1000),
+    timestamp = now,
     dismissalPolicy,
     dismissalDate,
   } = params;
@@ -81,7 +82,7 @@ function buildApsPayload(params: {
     if (attributes) aps['attributes'] = attributes;
   }
   if (event === 'end' && dismissalPolicy === 'immediate') {
-    aps['dismissal-date'] = Math.max(0, normalizedTimestamp - 1);
+    aps['dismissal-date'] = Math.max(0, now - 1);
   } else if (
     event === 'end' &&
     (dismissalPolicy === 'after' || dismissalPolicy === undefined) &&
