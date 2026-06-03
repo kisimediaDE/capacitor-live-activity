@@ -39,6 +39,12 @@
           <h2>End Activity</h2>
           <input id="end-id" placeholder="Activity ID" />
           <textarea id="end-state" placeholder='Final Content State JSON'></textarea>
+          <select id="end-dismissal-policy">
+            <option value="default">System Default</option>
+            <option value="immediate">Immediate</option>
+            <option value="after">After Dismissal Timestamp</option>
+            <option value="">Unspecified (legacy)</option>
+          </select>
           <input id="end-dismissal" placeholder="Dismissal Timestamp (optional)" />
           <button onclick="endActivity()">⏹ End Activity</button>
         </section>

@@ -78,10 +78,11 @@
   }
 
   input,
-textarea {
-  font-size: 1rem; /* bleibt dann bei 14px */
-  -webkit-text-size-adjust: 100%;
-}
+  select,
+  textarea {
+    font-size: 1rem; /* bleibt dann bei 14px */
+    -webkit-text-size-adjust: 100%;
+  }
   
   h1 {
     font-size: 1.4rem;

@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  github-actions:
+    name: GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint workflows
+        uses: devops-actions/actionlint@v0.1.12
+
+  plugin-web:
+    name: Plugin (Web)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint TypeScript
+        run: npm run eslint
+
+      - name: Check formatting
+        run: npm run prettier -- --check
+
+      - name: Build plugin
+        run: npm run build
+
+  plugin-ios:
+    name: Plugin (iOS)
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify iOS build
+        run: npm run verify:ios
+
+  example-app-web:
+    name: Example App (Web)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            example-app/package-lock.json
+
+      - name: Install plugin dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Pack plugin tarball
+        run: echo "PLUGIN_TGZ=$(npm pack --silent)" >> "$GITHUB_ENV"
+
+      - name: Install example app dependencies
+        working-directory: example-app
+        run: npm ci
+
+      - name: Install packaged plugin in example app
+        working-directory: example-app
+        run: npm install --no-save "../${PLUGIN_TGZ}"
+
+      - name: Build example app web
+        working-directory: example-app
+        run: npm run build
+
+  example-server:
+    name: Example Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: example-server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: example-server
+        run: npm ci
+
+      - name: Build example server
+        working-directory: example-server
+        run: npm run build

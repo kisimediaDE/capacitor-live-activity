@@ -1,10 +1,10 @@
 import 'dotenv/config';
+import cors from 'cors';
 import express from 'express';
 import admin from 'firebase-admin';
-import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
-import cors from 'cors';
+import { z } from 'zod';
 
 const PORT = Number(process.env.PORT ?? 3000);
 const ATTRIBUTES_TYPE = process.env.ATTRIBUTES_TYPE ?? 'GenericAttributes';
@@ -59,26 +59,37 @@ function buildApsPayload(params: {
   attributes?: Record<string, unknown>;
   alert?: { title?: string; body?: string; sound?: string };
   timestamp?: number; // seconds since epoch
+  dismissalPolicy?: 'default' | 'immediate' | 'after';
   dismissalDate?: number; // seconds since epoch (for 'end')
 }) {
+  const now = Math.floor(Date.now() / 1000);
   const {
     event,
     contentState,
     attributesType,
     attributes,
     alert,
-    timestamp = Math.floor(Date.now() / 1000),
+    timestamp = now,
+    dismissalPolicy,
     dismissalDate,
   } = params;
-  const aps: Record<string, unknown> = { timestamp, event };
+  const normalizedTimestamp = Number.isFinite(timestamp) ? Math.max(0, Math.floor(timestamp)) : now;
+  const aps: Record<string, unknown> = { timestamp: normalizedTimestamp, event };
   if (contentState) aps['content-state'] = contentState;
   if (alert) aps['alert'] = alert;
   if (event === 'start') {
     if (attributesType) aps['attributes-type'] = attributesType;
     if (attributes) aps['attributes'] = attributes;
   }
-  if (event === 'end' && typeof dismissalDate === 'number') {
-    aps['dismissal-date'] = dismissalDate;
+  if (event === 'end' && dismissalPolicy === 'immediate') {
+    aps['dismissal-date'] = Math.max(0, now - 1);
+  } else if (
+    event === 'end' &&
+    (dismissalPolicy === 'after' || dismissalPolicy === undefined) &&
+    typeof dismissalDate === 'number' &&
+    Number.isFinite(dismissalDate)
+  ) {
+    aps['dismissal-date'] = Math.max(0, Math.floor(dismissalDate));
   }
   return aps;
 }
@@ -130,7 +141,7 @@ const StartSchema = z.object({
       sound: z.string().optional(),
     })
     .optional(),
-  timestamp: z.number().optional(),
+  timestamp: z.number().finite().optional(),
 });
 
 app.post('/live-activity/start', async (req, res) => {
@@ -180,7 +191,7 @@ const UpdateSchema = z.object({
       sound: z.string().optional(),
     })
     .optional(),
-  timestamp: z.number().optional(),
+  timestamp: z.number().finite().optional(),
 });
 
 app.post('/live-activity/update', async (req, res) => {
@@ -217,20 +228,26 @@ app.post('/live-activity/update', async (req, res) => {
   }
 });
 
-const EndSchema = z.object({
-  fcmToken: z.string().min(1),
-  pushToken: z.string().min(1),
-  contentState: z.record(z.string(), z.any()).default({}),
-  alert: z
-    .object({
-      title: z.string().optional(),
-      body: z.string().optional(),
-      sound: z.string().optional(),
-    })
-    .optional(),
-  dismissalDate: z.number().optional(),
-  timestamp: z.number().optional(),
-});
+const EndSchema = z
+  .object({
+    fcmToken: z.string().min(1),
+    pushToken: z.string().min(1),
+    contentState: z.record(z.string(), z.any()).default({}),
+    alert: z
+      .object({
+        title: z.string().optional(),
+        body: z.string().optional(),
+        sound: z.string().optional(),
+      })
+      .optional(),
+    dismissalDate: z.number().finite().optional(),
+    dismissalPolicy: z.enum(['default', 'immediate', 'after']).optional(),
+    timestamp: z.number().finite().optional(),
+  })
+  .refine((data) => data.dismissalPolicy !== 'after' || typeof data.dismissalDate === 'number', {
+    message: "dismissalPolicy 'after' requires dismissalDate",
+    path: ['dismissalDate'],
+  });
 
 app.post('/live-activity/end', async (req, res) => {
   logHeader('Live Activity END: new /live-activity/end POST');
@@ -244,6 +261,7 @@ app.post('/live-activity/end', async (req, res) => {
       contentState: data.contentState,
       alert: data.alert,
       timestamp: data.timestamp,
+      dismissalPolicy: data.dismissalPolicy,
       dismissalDate: data.dismissalDate,
     });
     logObj('Built FCM aps payload', aps);

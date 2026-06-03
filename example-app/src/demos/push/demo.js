@@ -18,13 +18,14 @@ window.onload = () => {
   $('push').value = localStorage.getItem(LS.PUSH) || '';
 
   // sinnvolle Defaults
-  $('attributes-type').value = 'LiveActivityWidget.GenericAttributes';
+  $('attributes-type').value = 'LiveActivityWidgetExtension.GenericAttributes';
   $('attrs').value = JSON.stringify({ id: 'demo-remote', staticValues: { type: 'delivery', title: '📦 Delivery' } }, null, 2);
   $('content').value = JSON.stringify({ status: 'Starting…', eta: '20 min' }, null, 2);
   $('alert').value = JSON.stringify({ title: 'Live Activity', body: 'Started remotely' }, null, 2);
 
   $('upd').value = JSON.stringify({ status: 'On the way', eta: '5 min' }, null, 2);
   $('updAlert').value = JSON.stringify({ title: 'Update', body: 'Almost there' }, null, 2);
+  $('dismissal-policy').value = 'default';
   $('endState').value = JSON.stringify({ status: 'Delivered', eta: 'Now' }, null, 2);
 };
 
@@ -136,11 +137,13 @@ window.remoteUpdate = async () => {
 
 window.remoteEnd = async () => {
   try {
+    const dismissalPolicy = $('dismissal-policy').value.trim();
     const dismissal = $('dismissal').value.trim();
     const out = await post('/live-activity/end', {
       fcmToken: fcm(),
       pushToken: push(),
       contentState: ($('endState').value.trim() ? { values: JSON.parse($('endState').value) } : undefined),
+      dismissalPolicy: dismissalPolicy || undefined,
       dismissalDate: dismissal ? parseInt(dismissal, 10) : undefined
     });
     log('⏹ Remote end OK. messageId=' + out.messageId);

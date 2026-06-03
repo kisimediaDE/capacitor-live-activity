@@ -9,6 +9,9 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 @available(iOS 16.2, *)
 @objc public class LiveActivity: NSObject {
     private var activities: [String: Activity<GenericAttributes>] = [:]
+    private var activityOrder: [String] = []
+    private let activitiesQueue = DispatchQueue(
+        label: "de.kisimedia.capacitor-live-activity.activities")
     weak var plugin: CAPPlugin?
 
     override public init() {
@@ -19,17 +22,16 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                 let id = activity.attributes.id
 
                 switch activity.activityState {
-                case .active, .stale, .pending:
-                    activities[id] = activity
-                case .ended, .dismissed:
-                    /// No action: ignore ended/dismissed activities (cleanup)
-                    print("🧹 Ignored ended activity: \(id)")
+                case .active, .stale, .pending, .ended:
+                    setActivity(activity, for: id)
+                case .dismissed:
+                    print("🧹 Ignored dismissed activity: \(id)")
                 @unknown default:
                     print("⚠️ Unknown state for activity: \(id)")
                 }
             }
 
-            print("✅ Init complete. Active activities: \(activities.count)")
+            print("✅ Init complete. Known activities: \(knownActivityCount())")
             self.observeActivityUpdates()
         }
     }
@@ -45,7 +47,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         let state = GenericAttributes.ContentState(values: content)
         let activity = try Activity<GenericAttributes>.request(
             attributes: attr, contentState: state, pushType: nil)
-        activities[id] = activity
+        setActivity(activity, for: id)
     }
 
     @objc public func startActivityWithPush(
@@ -62,7 +64,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
             pushType: .token
         )
 
-        self.activities[id] = activity
+        setActivity(activity, for: id)
 
         Task { [weak self] in
             for await data in activity.pushTokenUpdates {
@@ -121,7 +123,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
             start: startDate
         )
 
-        self.activities[id] = activity
+        setActivity(activity, for: id)
 
         // If push is enabled, observe push token updates
         if enablePushToUpdate {
@@ -143,21 +145,35 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
     }
 
     @objc public func update(id: String, content: [String: String]) async {
-        if let activity = activities[id] {
+        if let activity = activity(for: id), isRunningActivity(activity) {
             let state = GenericAttributes.ContentState(values: content)
             await activity.update(ActivityContent(state: state, staleDate: nil))
         }
     }
 
     @objc public func end(id: String, content: [String: String], dismissalDate: NSNumber?) async {
-        if let activity = activities[id] {
+        await end(id: id, content: content, dismissalPolicy: nil, dismissalDate: dismissalDate)
+    }
+
+    @objc public func end(
+        id: String,
+        content: [String: String],
+        dismissalPolicy policy: String?,
+        dismissalDate: NSNumber?
+    ) async {
+        if let activity = activity(for: id) {
             let state = GenericAttributes.ContentState(values: content)
 
-            var dismissalPolicy: ActivityUIDismissalPolicy = .default
-
-            if let dismissalTimestamp = dismissalDate {
+            let dismissesImmediately = policy == "immediate"
+            let dismissesAfterDate = policy == "after" || policy == nil
+            let dismissalPolicy: ActivityUIDismissalPolicy
+            if dismissesImmediately {
+                dismissalPolicy = .immediate
+            } else if dismissesAfterDate, let dismissalTimestamp = dismissalDate {
                 let date = Date(timeIntervalSince1970: dismissalTimestamp.doubleValue)
                 dismissalPolicy = .after(date)
+            } else {
+                dismissalPolicy = .default
             }
 
             await activity.end(
@@ -165,24 +181,42 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                 dismissalPolicy: dismissalPolicy
             )
 
-            activities.removeValue(forKey: id)
+            if dismissesImmediately {
+                removeActivity(for: id)
+            } else {
+                setActivity(activity, for: id)
+            }
         }
     }
 
     @objc public func isRunning(id: String) -> Bool {
-        return activities[id] != nil
+        guard let activity = activity(for: id) else { return false }
+
+        return isRunningActivity(activity)
+    }
+
+    private func isRunningActivity(_ activity: Activity<GenericAttributes>) -> Bool {
+        switch activity.activityState {
+        case .active, .stale, .pending:
+            return true
+        case .ended, .dismissed:
+            return false
+        @unknown default:
+            return false
+        }
     }
 
     @objc public func getCurrent(id: String?) -> [String: Any]? {
-        var activity: Activity<GenericAttributes>?
+        var selectedActivity: Activity<GenericAttributes>?
 
         if let id = id {
-            activity = activities[id]
+            selectedActivity = activity(for: id)
         } else {
-            activity = activities.values.first
+            selectedActivity = firstRunningActivity()
         }
 
-        guard let a = activity else { return nil }
+        guard let a = selectedActivity else { return nil }
+        guard isRunningActivity(a) else { return nil }
 
         return [
             "id": a.id,
@@ -197,10 +231,10 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         Task { [weak self] in
             for await a in Activity<GenericAttributes>.activityUpdates {
                 switch a.activityState {
-                case .active, .stale, .pending:
-                    self?.activities[a.attributes.id] = a
-                case .ended, .dismissed:
-                    self?.activities.removeValue(forKey: a.attributes.id)
+                case .active, .stale, .pending, .ended:
+                    self?.setActivity(a, for: a.attributes.id)
+                case .dismissed:
+                    self?.removeActivity(for: a.attributes.id)
                 @unknown default:
                     break
                 }
@@ -214,6 +248,47 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                         "state": String(describing: a.activityState),
                     ])
             }
+        }
+    }
+
+    private func setActivity(_ activity: Activity<GenericAttributes>, for id: String) {
+        activitiesQueue.sync {
+            if let existingActivity = activities[id] {
+                if existingActivity.id != activity.id {
+                    activityOrder.removeAll { $0 == id }
+                    activityOrder.append(id)
+                }
+            } else {
+                activityOrder.append(id)
+            }
+            activities[id] = activity
+        }
+    }
+
+    private func removeActivity(for id: String) {
+        activitiesQueue.sync {
+            _ = activities.removeValue(forKey: id)
+            activityOrder.removeAll { $0 == id }
+        }
+    }
+
+    private func activity(for id: String) -> Activity<GenericAttributes>? {
+        activitiesQueue.sync {
+            activities[id]
+        }
+    }
+
+    private func firstRunningActivity() -> Activity<GenericAttributes>? {
+        activitiesQueue.sync {
+            activityOrder.reversed().compactMap { activities[$0] }.first {
+                isRunningActivity($0)
+            }
+        }
+    }
+
+    private func knownActivityCount() -> Int {
+        activitiesQueue.sync {
+            activities.count
         }
     }
 
