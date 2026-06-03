@@ -72,7 +72,8 @@ function buildApsPayload(params: {
     dismissalPolicy,
     dismissalDate,
   } = params;
-  const aps: Record<string, unknown> = { timestamp, event };
+  const normalizedTimestamp = Math.max(0, Math.floor(timestamp));
+  const aps: Record<string, unknown> = { timestamp: normalizedTimestamp, event };
   if (contentState) aps['content-state'] = contentState;
   if (alert) aps['alert'] = alert;
   if (event === 'start') {
@@ -80,13 +81,13 @@ function buildApsPayload(params: {
     if (attributes) aps['attributes'] = attributes;
   }
   if (event === 'end' && dismissalPolicy === 'immediate') {
-    aps['dismissal-date'] = timestamp - 1;
+    aps['dismissal-date'] = Math.max(0, normalizedTimestamp - 1);
   } else if (
     event === 'end' &&
     (dismissalPolicy === 'after' || dismissalPolicy === undefined) &&
     typeof dismissalDate === 'number'
   ) {
-    aps['dismissal-date'] = dismissalDate;
+    aps['dismissal-date'] = Math.max(0, Math.floor(dismissalDate));
   }
   return aps;
 }
