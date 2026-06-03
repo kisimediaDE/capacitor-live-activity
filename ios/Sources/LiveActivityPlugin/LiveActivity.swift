@@ -144,7 +144,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
     }
 
     @objc public func update(id: String, content: [String: String]) async {
-        if let activity = activity(for: id) {
+        if let activity = activity(for: id), isRunningActivity(activity) {
             let state = GenericAttributes.ContentState(values: content)
             await activity.update(ActivityContent(state: state, staleDate: nil))
         }
@@ -217,7 +217,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
             "id": a.id,
             "values": a.content.state.values,
             "isStale": a.content.staleDate != nil,
-            "isEnded": a.activityState == .ended,
+            "isEnded": false,
             "startedAt": a.content.state.values["startedAt"] ?? "",
         ]
     }
