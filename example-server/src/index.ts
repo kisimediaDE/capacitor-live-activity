@@ -1,10 +1,10 @@
 import 'dotenv/config';
+import cors from 'cors';
 import express from 'express';
 import admin from 'firebase-admin';
-import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
-import cors from 'cors';
+import { z } from 'zod';
 
 const PORT = Number(process.env.PORT ?? 3000);
 const ATTRIBUTES_TYPE = process.env.ATTRIBUTES_TYPE ?? 'GenericAttributes';

@@ -2,6 +2,7 @@
 // Web shim: exposes the same API with no-ops for non-iOS platforms.
 
 import { WebPlugin } from '@capacitor/core';
+
 import type {
   LiveActivityPlugin,
   StartActivityOptions,
