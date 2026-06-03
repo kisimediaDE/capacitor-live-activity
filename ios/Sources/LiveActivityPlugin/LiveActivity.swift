@@ -9,6 +9,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 @available(iOS 16.2, *)
 @objc public class LiveActivity: NSObject {
     private var activities: [String: Activity<GenericAttributes>] = [:]
+    private var activityOrder: [String] = []
     private let activitiesQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.activities")
     weak var plugin: CAPPlugin?
@@ -252,6 +253,14 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 
     private func setActivity(_ activity: Activity<GenericAttributes>, for id: String) {
         activitiesQueue.sync {
+            if let existingActivity = activities[id] {
+                if existingActivity.id != activity.id {
+                    activityOrder.removeAll { $0 == id }
+                    activityOrder.append(id)
+                }
+            } else {
+                activityOrder.append(id)
+            }
             activities[id] = activity
         }
     }
@@ -259,6 +268,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
     private func removeActivity(for id: String) {
         activitiesQueue.sync {
             _ = activities.removeValue(forKey: id)
+            activityOrder.removeAll { $0 == id }
         }
     }
 
@@ -270,7 +280,9 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 
     private func firstRunningActivity() -> Activity<GenericAttributes>? {
         activitiesQueue.sync {
-            activities.values.first { isRunningActivity($0) }
+            activityOrder.reversed().compactMap { activities[$0] }.first {
+                isRunningActivity($0)
+            }
         }
     }
 
