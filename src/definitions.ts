@@ -284,7 +284,7 @@ export interface EndActivityOptions {
    * Optional dismissal policy.
    * - `default`: the system default dismissal behavior.
    * - `immediate`: dismiss the Live Activity immediately after ending it.
-   * - `after`: dismiss the Live Activity after `dismissalDate`.
+   * - `after`: dismiss the Live Activity after `dismissalDate`; requires `dismissalDate`.
    *
    * If omitted, `dismissalDate` still maps to `after` for backward compatibility;
    * otherwise the system default dismissal policy applies.
