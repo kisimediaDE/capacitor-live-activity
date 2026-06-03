@@ -150,6 +150,10 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         }
     }
 
+    @objc public func end(id: String, content: [String: String], dismissalDate: NSNumber?) async {
+        await end(id: id, content: content, dismissalPolicy: nil, dismissalDate: dismissalDate)
+    }
+
     @objc public func end(
         id: String,
         content: [String: String],
