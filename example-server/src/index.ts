@@ -73,7 +73,7 @@ function buildApsPayload(params: {
     dismissalPolicy,
     dismissalDate,
   } = params;
-  const normalizedTimestamp = Math.max(0, Math.floor(timestamp));
+  const normalizedTimestamp = Number.isFinite(timestamp) ? Math.max(0, Math.floor(timestamp)) : now;
   const aps: Record<string, unknown> = { timestamp: normalizedTimestamp, event };
   if (contentState) aps['content-state'] = contentState;
   if (alert) aps['alert'] = alert;
@@ -86,7 +86,8 @@ function buildApsPayload(params: {
   } else if (
     event === 'end' &&
     (dismissalPolicy === 'after' || dismissalPolicy === undefined) &&
-    typeof dismissalDate === 'number'
+    typeof dismissalDate === 'number' &&
+    Number.isFinite(dismissalDate)
   ) {
     aps['dismissal-date'] = Math.max(0, Math.floor(dismissalDate));
   }
@@ -140,7 +141,7 @@ const StartSchema = z.object({
       sound: z.string().optional(),
     })
     .optional(),
-  timestamp: z.number().optional(),
+  timestamp: z.number().finite().optional(),
 });
 
 app.post('/live-activity/start', async (req, res) => {
@@ -190,7 +191,7 @@ const UpdateSchema = z.object({
       sound: z.string().optional(),
     })
     .optional(),
-  timestamp: z.number().optional(),
+  timestamp: z.number().finite().optional(),
 });
 
 app.post('/live-activity/update', async (req, res) => {
@@ -239,9 +240,9 @@ const EndSchema = z
         sound: z.string().optional(),
       })
       .optional(),
-    dismissalDate: z.number().optional(),
+    dismissalDate: z.number().finite().optional(),
     dismissalPolicy: z.enum(['default', 'immediate', 'after']).optional(),
-    timestamp: z.number().optional(),
+    timestamp: z.number().finite().optional(),
   })
   .refine((data) => data.dismissalPolicy !== 'after' || typeof data.dismissalDate === 'number', {
     message: "dismissalPolicy 'after' requires dismissalDate",
