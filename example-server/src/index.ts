@@ -227,21 +227,26 @@ app.post('/live-activity/update', async (req, res) => {
   }
 });
 
-const EndSchema = z.object({
-  fcmToken: z.string().min(1),
-  pushToken: z.string().min(1),
-  contentState: z.record(z.string(), z.any()).default({}),
-  alert: z
-    .object({
-      title: z.string().optional(),
-      body: z.string().optional(),
-      sound: z.string().optional(),
-    })
-    .optional(),
-  dismissalDate: z.number().optional(),
-  dismissalPolicy: z.enum(['default', 'immediate', 'after']).optional(),
-  timestamp: z.number().optional(),
-});
+const EndSchema = z
+  .object({
+    fcmToken: z.string().min(1),
+    pushToken: z.string().min(1),
+    contentState: z.record(z.string(), z.any()).default({}),
+    alert: z
+      .object({
+        title: z.string().optional(),
+        body: z.string().optional(),
+        sound: z.string().optional(),
+      })
+      .optional(),
+    dismissalDate: z.number().optional(),
+    dismissalPolicy: z.enum(['default', 'immediate', 'after']).optional(),
+    timestamp: z.number().optional(),
+  })
+  .refine((data) => data.dismissalPolicy !== 'after' || typeof data.dismissalDate === 'number', {
+    message: "dismissalPolicy 'after' requires dismissalDate",
+    path: ['dismissalDate'],
+  });
 
 app.post('/live-activity/end', async (req, res) => {
   logHeader('Live Activity END: new /live-activity/end POST');

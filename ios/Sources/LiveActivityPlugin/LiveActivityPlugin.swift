@@ -124,6 +124,17 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
 
         let dismissalPolicy = call.getString("dismissalPolicy")
         let dismissalDate = call.getDouble("dismissalDate").map(NSNumber.init(value:))
+
+        if let dismissalPolicy, !["default", "immediate", "after"].contains(dismissalPolicy) {
+            call.reject("Invalid dismissalPolicy: \(dismissalPolicy)")
+            return
+        }
+
+        if dismissalPolicy == "after", dismissalDate == nil {
+            call.reject("dismissalPolicy 'after' requires dismissalDate")
+            return
+        }
+
         Task {
             await implementation.end(
                 id: id,
