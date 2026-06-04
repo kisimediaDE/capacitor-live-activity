@@ -58,7 +58,8 @@ private struct UpdateTokenEndpoint: Codable {
     @objc public func setUpdateTokenEndpoint(url: String, headers: [String: String]) throws {
         guard let endpointUrl = URL(string: url),
             let scheme = endpointUrl.scheme?.lowercased(),
-            scheme == "https" || (scheme == "http" && Self.isLoopbackHost(endpointUrl.host))
+            let host = endpointUrl.host,
+            scheme == "https" || (scheme == "http" && Self.isLoopbackHost(host))
         else {
             throw NSError(
                 domain: "LiveActivity",

@@ -67,6 +67,17 @@ final class LiveActivityPluginTests: XCTestCase {
         }
     }
 
+    func testSetUpdateTokenEndpointRejectsHttpsUrlsWithoutHost() {
+        if #available(iOS 16.2, *) {
+            XCTAssertThrowsError(
+                try plugin.setUpdateTokenEndpoint(
+                    url: "https:example.com/live-activity/register-token",
+                    headers: [:]
+                )
+            )
+        }
+    }
+
     func testSetUpdateTokenEndpointAllowsLoopbackHttpUrls() throws {
         if #available(iOS 16.2, *) {
             try plugin.setUpdateTokenEndpoint(
