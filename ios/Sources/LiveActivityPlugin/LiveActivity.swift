@@ -282,6 +282,7 @@ private struct UpdateTokenEndpoint: Codable {
                     activityOrder.append(id)
                     taskToCancel = stopObservingPushTokenUpdatesLocked(
                         for: existingActivity.id)
+                    pushTokenObservationDisabledActivityIds.remove(existingActivity.id)
                 }
             } else {
                 activityOrder.append(id)
@@ -365,25 +366,39 @@ private struct UpdateTokenEndpoint: Codable {
         logicalId id: String
     ) {
         let generation = UUID()
-        activitiesQueue.sync {
+        let shouldCreateTask = activitiesQueue.sync {
             if observedTokenActivityIds.contains(activity.id) {
-                return
+                return false
             }
             observedTokenActivityIds.insert(activity.id)
             pushTokenObserverGenerations[activity.id] = generation
+            return true
+        }
 
-            pushTokenObserverTasks[activity.id] = Task { [weak self] in
-                defer {
-                    self?.finishObservingPushTokenUpdates(
-                        for: activity.id,
-                        generation: generation
-                    )
-                }
-                for await data in activity.pushTokenUpdates {
-                    let token = data.map { String(format: "%02x", $0) }.joined()
-                    await self?.handlePushToken(id: id, activityId: activity.id, token: token)
-                }
+        guard shouldCreateTask else { return }
+
+        let task = Task { [weak self] in
+            defer {
+                self?.finishObservingPushTokenUpdates(
+                    for: activity.id,
+                    generation: generation
+                )
             }
+            for await data in activity.pushTokenUpdates {
+                let token = data.map { String(format: "%02x", $0) }.joined()
+                await self?.handlePushToken(id: id, activityId: activity.id, token: token)
+            }
+        }
+
+        let shouldCancelTask = activitiesQueue.sync {
+            guard pushTokenObserverGenerations[activity.id] == generation else {
+                return true
+            }
+            pushTokenObserverTasks[activity.id] = task
+            return false
+        }
+        if shouldCancelTask {
+            task.cancel()
         }
     }
 
@@ -421,15 +436,15 @@ private struct UpdateTokenEndpoint: Codable {
     }
 
     private func registerUpdateToken(payload: [String: Any]) async {
-        guard let endpoint = currentUpdateTokenEndpoint(),
-            let url = URL(string: endpoint.url)
+        guard let config = currentUpdateTokenConfiguration(),
+            let url = URL(string: config.endpoint.url)
         else { return }
 
         do {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            currentUpdateTokenHeaders().forEach { key, value in
+            config.headers.forEach { key, value in
                 request.setValue(value, forHTTPHeaderField: key)
             }
             request.httpBody = try JSONSerialization.data(withJSONObject: payload)
@@ -449,15 +464,13 @@ private struct UpdateTokenEndpoint: Codable {
         }
     }
 
-    private func currentUpdateTokenEndpoint() -> UpdateTokenEndpoint? {
+    private func currentUpdateTokenConfiguration() -> (
+        endpoint: UpdateTokenEndpoint,
+        headers: [String: String]
+    )? {
         endpointQueue.sync {
-            updateTokenEndpoint
-        }
-    }
-
-    private func currentUpdateTokenHeaders() -> [String: String] {
-        endpointQueue.sync {
-            updateTokenHeaders
+            guard let endpoint = updateTokenEndpoint else { return nil }
+            return (endpoint, updateTokenHeaders)
         }
     }
 
