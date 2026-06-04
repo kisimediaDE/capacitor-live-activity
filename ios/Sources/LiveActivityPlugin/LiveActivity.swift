@@ -58,14 +58,14 @@ private struct UpdateTokenEndpoint: Codable {
     @objc public func setUpdateTokenEndpoint(url: String, headers: [String: String]) throws {
         guard let endpointUrl = URL(string: url),
             let scheme = endpointUrl.scheme?.lowercased(),
-            ["http", "https"].contains(scheme)
+            scheme == "https" || (scheme == "http" && Self.isLoopbackHost(endpointUrl.host))
         else {
             throw NSError(
                 domain: "LiveActivity",
                 code: 1,
                 userInfo: [
                     NSLocalizedDescriptionKey:
-                        "setUpdateTokenEndpoint requires a valid http or https URL"
+                        "setUpdateTokenEndpoint requires an https URL or http://localhost for development"
                 ])
         }
 
@@ -454,12 +454,12 @@ private struct UpdateTokenEndpoint: Codable {
                 !(200...299).contains(httpResponse.statusCode)
             {
                 print(
-                    "⚠️ LiveActivity update token registration failed with HTTP \(httpResponse.statusCode)"
+                    "⚠️ LiveActivity update token registration failed with HTTP \(httpResponse.statusCode) for \(config.endpoint.url)"
                 )
             }
         } catch {
             print(
-                "⚠️ LiveActivity update token registration failed: \(error.localizedDescription)"
+                "⚠️ LiveActivity update token registration failed for \(config.endpoint.url): \(error.localizedDescription)"
             )
         }
     }
@@ -485,5 +485,10 @@ private struct UpdateTokenEndpoint: Codable {
     private static func saveUpdateTokenEndpoint(_ endpoint: UpdateTokenEndpoint) {
         guard let data = try? JSONEncoder().encode(endpoint) else { return }
         UserDefaults.standard.set(data, forKey: UPDATE_TOKEN_ENDPOINT_KEY)
+    }
+
+    private static func isLoopbackHost(_ host: String?) -> Bool {
+        guard let host = host?.lowercased() else { return false }
+        return ["localhost", "127.0.0.1", "::1"].contains(host)
     }
 }

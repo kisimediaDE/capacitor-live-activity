@@ -56,6 +56,30 @@ final class LiveActivityPluginTests: XCTestCase {
         }
     }
 
+    func testSetUpdateTokenEndpointRejectsNonLoopbackHttpUrls() {
+        if #available(iOS 16.2, *) {
+            XCTAssertThrowsError(
+                try plugin.setUpdateTokenEndpoint(
+                    url: "http://example.com/live-activity/register-token",
+                    headers: [:]
+                )
+            )
+        }
+    }
+
+    func testSetUpdateTokenEndpointAllowsLoopbackHttpUrls() throws {
+        if #available(iOS 16.2, *) {
+            try plugin.setUpdateTokenEndpoint(
+                url: "http://localhost:3000/live-activity/register-token",
+                headers: [:]
+            )
+            XCTAssertEqual(
+                plugin.getUpdateTokenEndpoint()?["url"] as? String,
+                "http://localhost:3000/live-activity/register-token"
+            )
+        }
+    }
+
     func testSetUpdateTokenEndpointPersistsAndReloadsUrlOnly() throws {
         if #available(iOS 16.2, *) {
             try plugin.setUpdateTokenEndpoint(

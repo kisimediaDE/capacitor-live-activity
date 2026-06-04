@@ -197,7 +197,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         if let headerObject = call.getObject("headers") {
             for (key, value) in headerObject {
                 guard let headerValue = value as? String else {
-                    call.reject("Header values must be strings")
+                    call.reject("Header '\(key)' value must be a string")
                     return
                 }
                 headers[key] = headerValue
