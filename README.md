@@ -689,10 +689,10 @@ Result of listing activities.
 
 Options for native per-activity update token registration.
 
-| Prop          | Type                                                            | Description                                                                                                                                      |
-| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`url`**     | <code>string</code>                                             | Absolute HTTP(S) URL that receives the update token registration payload.                                                                        |
-| **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST for the current app session only. Headers are not persisted; avoid long-lived secrets here. |
+| Prop          | Type                                                            | Description                                                                                                                                                             |
+| ------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`url`**     | <code>string</code>                                             | Absolute HTTPS URL that receives the update token registration payload. On iOS, HTTP is accepted only for loopback development hosts (`localhost`, `127.0.0.1`, `::1`). |
+| **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST for the current app session only. Headers are not persisted; avoid long-lived secrets here.                        |
 
 
 #### PluginListenerHandle

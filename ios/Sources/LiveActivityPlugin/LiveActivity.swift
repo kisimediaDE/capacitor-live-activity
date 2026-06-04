@@ -65,7 +65,7 @@ private struct UpdateTokenEndpoint: Codable {
                 code: 1,
                 userInfo: [
                     NSLocalizedDescriptionKey:
-                        "setUpdateTokenEndpoint requires an https URL or http://localhost for development"
+                        "setUpdateTokenEndpoint requires an https URL or a loopback http URL for development"
                 ])
         }
 

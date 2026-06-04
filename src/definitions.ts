@@ -252,7 +252,9 @@ export interface ScheduledActivityOptions {
  */
 export interface UpdateTokenEndpointOptions {
   /**
-   * Absolute HTTP(S) URL that receives the update token registration payload.
+   * Absolute HTTPS URL that receives the update token registration payload.
+   * On iOS, HTTP is accepted only for loopback development hosts
+   * (`localhost`, `127.0.0.1`, `::1`).
    */
   url: string;
 
