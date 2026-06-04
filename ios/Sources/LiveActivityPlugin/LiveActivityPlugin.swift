@@ -18,6 +18,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getCurrentActivity", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listActivities", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "observePushToStartToken", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setUpdateTokenEndpoint", returnType: CAPPluginReturnPromise),
     ]
 
     private let implementation = LiveActivity()
@@ -183,6 +184,31 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve()
         } else {
             call.reject("observePushToStartToken requires iOS 17.2+")
+        }
+    }
+
+    @objc func setUpdateTokenEndpoint(_ call: CAPPluginCall) {
+        guard let url = call.getString("url") else {
+            call.reject("Missing update token endpoint url")
+            return
+        }
+
+        var headers: [String: String] = [:]
+        if let headerObject = call.getObject("headers") {
+            for (key, value) in headerObject {
+                guard let headerValue = value as? String else {
+                    call.reject("Header values must be strings")
+                    return
+                }
+                headers[key] = headerValue
+            }
+        }
+
+        do {
+            try implementation.setUpdateTokenEndpoint(url: url, headers: headers)
+            call.resolve()
+        } catch {
+            call.reject(error.localizedDescription)
         }
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [8.2.0] - 2026-06-03
+
+### Added
+
+- **Native update token registration:** Added `setUpdateTokenEndpoint(...)` so iOS can POST per-activity update tokens to a configured backend endpoint while keeping the existing `liveActivityPushToken` event unchanged. ([#14](https://github.com/kisimediaDE/capacitor-live-activity/issues/14))
+- **Immediate dismissal policy:** Added `dismissalPolicy: "immediate"` support for ending Live Activities immediately, and iOS now keeps ended activities available via `listActivities()` so persisted ended activities can be dismissed after app restart. ([#15](https://github.com/kisimediaDE/capacitor-live-activity/issues/15))
+- **Example App:** Added dismissal policy controls to the Live Activity demos, including explicit system default, immediate, after timestamp, and legacy unspecified modes.
+- **Example Server:** Added `/live-activity/register-token` to demonstrate receiving native update token registrations.
+
 ## [8.1.0] - 2026-01-26
 
 ### Added

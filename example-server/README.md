@@ -17,6 +17,18 @@ Minimal Node/TS server to send **Live Activity** pushes via **Firebase Cloud Mes
   - apns-priority: 10
   - For FCM: use `apns.liveActivityToken` with the per-activity token or push-to-start token.
 
+## Update token registration
+
+The example server exposes `POST /live-activity/register-token` for native token registration via:
+
+```ts
+await LiveActivity.setUpdateTokenEndpoint({
+  url: 'http://localhost:3000/live-activity/register-token',
+});
+```
+
+The plugin posts `{ id, activityId, token }` when ActivityKit provides a per-activity update token.
+
 ## Setup
 
 ```bash

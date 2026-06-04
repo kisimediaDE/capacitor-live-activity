@@ -249,6 +249,35 @@ LiveActivity.addListener('liveActivityPushToken', (event) => {
 });
 ```
 
+### Native Update Token Registration
+
+Configure a backend endpoint once before starting push-enabled Live Activities. iOS persists this setting and will POST each per-activity update token natively while still emitting the existing `liveActivityPushToken` event.
+
+```typescript
+await LiveActivity.setUpdateTokenEndpoint({
+  url: 'https://api.example.com/live-activity/register-token',
+  headers: {
+    Authorization: 'Bearer <token>',
+  },
+});
+
+await LiveActivity.startActivityWithPush({
+  id: 'delivery-123',
+  attributes: { type: 'delivery' },
+  contentState: { status: 'Preparing' },
+});
+```
+
+The endpoint receives:
+
+```json
+{
+  "id": "delivery-123",
+  "activityId": "system-activity-id",
+  "token": "hex-encoded-live-activity-token"
+}
+```
+
 ## 📱 Example App
 
 This plugin includes a fully functional demo app under the [`example-app/`](./example-app) directory.
@@ -276,6 +305,7 @@ The demo is designed to run on real iOS devices and showcases multiple Live Acti
 * [`getCurrentActivity(...)`](#getcurrentactivity)
 * [`listActivities()`](#listactivities)
 * [`observePushToStartToken()`](#observepushtostarttoken)
+* [`setUpdateTokenEndpoint(...)`](#setupdatetokenendpoint)
 * [`addListener('liveActivityPushToken', ...)`](#addlistenerliveactivitypushtoken-)
 * [`addListener('liveActivityPushToStartToken', ...)`](#addlistenerliveactivitypushtostarttoken-)
 * [`addListener('liveActivityUpdate', ...)`](#addlistenerliveactivityupdate-)
@@ -481,6 +511,29 @@ The token will be emitted via `"liveActivityPushToStartToken"`.
 --------------------
 
 
+### setUpdateTokenEndpoint(...)
+
+```typescript
+setUpdateTokenEndpoint(options: UpdateTokenEndpointOptions) => Promise<void>
+```
+
+Configure a native endpoint that receives per-activity update tokens.
+
+When a `liveActivityPushToken` is received, the iOS plugin will keep emitting
+the existing event and additionally POST `{ id, activityId, token }` to this
+endpoint. The endpoint is persisted on iOS so token registration can continue
+across app launches. Network errors are logged natively and do not reject
+`startActivityWithPush`.
+
+| Param         | Type                                                                              |
+| ------------- | --------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#updatetokenendpointoptions">UpdateTokenEndpointOptions</a></code> |
+
+**Since:** 8.2.0
+
+--------------------
+
+
 ### addListener('liveActivityPushToken', ...)
 
 ```typescript
@@ -628,6 +681,16 @@ Result of listing activities.
 | Prop        | Type                                                              |
 | ----------- | ----------------------------------------------------------------- |
 | **`items`** | <code>{ id: string; activityId: string; state: string; }[]</code> |
+
+
+#### UpdateTokenEndpointOptions
+
+Options for native per-activity update token registration.
+
+| Prop          | Type                                                            | Description                                                               |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **`url`**     | <code>string</code>                                             | Absolute HTTP(S) URL that receives the update token registration payload. |
+| **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST.                     |
 
 
 #### PluginListenerHandle

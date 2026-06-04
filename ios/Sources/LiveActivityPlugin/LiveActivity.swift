@@ -5,17 +5,29 @@ import Foundation
 private let EVT_PUSH_TOKEN = "liveActivityPushToken"
 private let EVT_PUSH_TO_START_TOKEN = "liveActivityPushToStartToken"
 private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
+private let UPDATE_TOKEN_ENDPOINT_KEY =
+    "de.kisimedia.capacitor-live-activity.updateTokenEndpoint"
+
+private struct UpdateTokenEndpoint: Codable {
+    let url: String
+    let headers: [String: String]
+}
 
 @available(iOS 16.2, *)
 @objc public class LiveActivity: NSObject {
     private var activities: [String: Activity<GenericAttributes>] = [:]
     private var activityOrder: [String] = []
+    private var observedTokenActivityIds = Set<String>()
+    private var updateTokenEndpoint: UpdateTokenEndpoint?
     private let activitiesQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.activities")
+    private let endpointQueue = DispatchQueue(
+        label: "de.kisimedia.capacitor-live-activity.update-token-endpoint")
     weak var plugin: CAPPlugin?
 
     override public init() {
         super.init()
+        updateTokenEndpoint = Self.loadUpdateTokenEndpoint()
 
         Task {
             for activity in Activity<GenericAttributes>.activities {
@@ -38,6 +50,27 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 
     @objc public func isAvailable() -> Bool {
         return ActivityAuthorizationInfo().areActivitiesEnabled
+    }
+
+    @objc public func setUpdateTokenEndpoint(url: String, headers: [String: String]) throws {
+        guard let endpointUrl = URL(string: url),
+            let scheme = endpointUrl.scheme?.lowercased(),
+            ["http", "https"].contains(scheme)
+        else {
+            throw NSError(
+                domain: "LiveActivity",
+                code: 1,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "setUpdateTokenEndpoint requires a valid http or https URL"
+                ])
+        }
+
+        let endpoint = UpdateTokenEndpoint(url: url, headers: headers)
+        endpointQueue.sync {
+            updateTokenEndpoint = endpoint
+            Self.saveUpdateTokenEndpoint(endpoint)
+        }
     }
 
     @objc public func start(id: String, attributes: [String: String], content: [String: String])
@@ -65,19 +98,6 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         )
 
         setActivity(activity, for: id)
-
-        Task { [weak self] in
-            for await data in activity.pushTokenUpdates {
-                let token = data.map { String(format: "%02x", $0) }.joined()
-                self?.plugin?.notifyListeners(
-                    EVT_PUSH_TOKEN,
-                    data: [
-                        "id": id,
-                        "activityId": activity.id,
-                        "token": token,
-                    ])
-            }
-        }
 
         return activity.id
     }
@@ -124,22 +144,6 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
         )
 
         setActivity(activity, for: id)
-
-        // If push is enabled, observe push token updates
-        if enablePushToUpdate {
-            Task { [weak self] in
-                for await data in activity.pushTokenUpdates {
-                    let token = data.map { String(format: "%02x", $0) }.joined()
-                    self?.plugin?.notifyListeners(
-                        EVT_PUSH_TOKEN,
-                        data: [
-                            "id": id,
-                            "activityId": activity.id,
-                            "token": token,
-                        ])
-                }
-            }
-        }
 
         return activity.id
     }
@@ -263,6 +267,7 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
             }
             activities[id] = activity
         }
+        observePushTokenUpdates(for: activity, logicalId: id)
     }
 
     private func removeActivity(for id: String) {
@@ -314,5 +319,86 @@ private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
                     ])
             }
         }
+    }
+
+    private func observePushTokenUpdates(
+        for activity: Activity<GenericAttributes>,
+        logicalId id: String
+    ) {
+        let shouldObserve = activitiesQueue.sync {
+            if observedTokenActivityIds.contains(activity.id) {
+                return false
+            }
+            observedTokenActivityIds.insert(activity.id)
+            return true
+        }
+
+        guard shouldObserve else { return }
+
+        Task { [weak self] in
+            for await data in activity.pushTokenUpdates {
+                let token = data.map { String(format: "%02x", $0) }.joined()
+                await self?.handlePushToken(id: id, activityId: activity.id, token: token)
+            }
+        }
+    }
+
+    private func handlePushToken(id: String, activityId: String, token: String) async {
+        let payload: [String: String] = [
+            "id": id,
+            "activityId": activityId,
+            "token": token,
+        ]
+
+        plugin?.notifyListeners(EVT_PUSH_TOKEN, data: payload)
+        await registerUpdateToken(payload: payload)
+    }
+
+    private func registerUpdateToken(payload: [String: String]) async {
+        guard let endpoint = currentUpdateTokenEndpoint(),
+            let url = URL(string: endpoint.url)
+        else { return }
+
+        do {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            endpoint.headers.forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse,
+                !(200...299).contains(httpResponse.statusCode)
+            {
+                print(
+                    "⚠️ LiveActivity update token registration failed with HTTP \(httpResponse.statusCode)"
+                )
+            }
+        } catch {
+            print(
+                "⚠️ LiveActivity update token registration failed: \(error.localizedDescription)"
+            )
+        }
+    }
+
+    private func currentUpdateTokenEndpoint() -> UpdateTokenEndpoint? {
+        endpointQueue.sync {
+            updateTokenEndpoint
+        }
+    }
+
+    private static func loadUpdateTokenEndpoint() -> UpdateTokenEndpoint? {
+        guard let data = UserDefaults.standard.data(forKey: UPDATE_TOKEN_ENDPOINT_KEY) else {
+            return nil
+        }
+
+        return try? JSONDecoder().decode(UpdateTokenEndpoint.self, from: data)
+    }
+
+    private static func saveUpdateTokenEndpoint(_ endpoint: UpdateTokenEndpoint) {
+        guard let data = try? JSONEncoder().encode(endpoint) else { return }
+        UserDefaults.standard.set(data, forKey: UPDATE_TOKEN_ENDPOINT_KEY)
     }
 }
