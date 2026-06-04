@@ -10,7 +10,6 @@ private let UPDATE_TOKEN_ENDPOINT_KEY =
 
 private struct UpdateTokenEndpoint: Codable {
     let url: String
-    let headers: [String: String]
 }
 
 @available(iOS 16.2, *)
@@ -18,7 +17,9 @@ private struct UpdateTokenEndpoint: Codable {
     private var activities: [String: Activity<GenericAttributes>] = [:]
     private var activityOrder: [String] = []
     private var observedTokenActivityIds = Set<String>()
+    private var pushTokenObserverTasks: [String: Task<Void, Never>] = [:]
     private var updateTokenEndpoint: UpdateTokenEndpoint?
+    private var updateTokenHeaders: [String: String] = [:]
     private let activitiesQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.activities")
     private let endpointQueue = DispatchQueue(
@@ -66,11 +67,20 @@ private struct UpdateTokenEndpoint: Codable {
                 ])
         }
 
-        let endpoint = UpdateTokenEndpoint(url: url, headers: headers)
+        let endpoint = UpdateTokenEndpoint(url: url)
         endpointQueue.sync {
             updateTokenEndpoint = endpoint
+            updateTokenHeaders = headers
             Self.saveUpdateTokenEndpoint(endpoint)
         }
+    }
+
+    func getUpdateTokenEndpoint() -> [String: Any]? {
+        guard let endpoint = currentUpdateTokenEndpoint() else { return nil }
+        return [
+            "url": endpoint.url,
+            "headers": currentUpdateTokenHeaders(),
+        ]
     }
 
     @objc public func start(id: String, attributes: [String: String], content: [String: String])
@@ -261,7 +271,7 @@ private struct UpdateTokenEndpoint: Codable {
                 if existingActivity.id != activity.id {
                     activityOrder.removeAll { $0 == id }
                     activityOrder.append(id)
-                    observedTokenActivityIds.remove(existingActivity.id)
+                    stopObservingPushTokenUpdates(for: existingActivity.id)
                 }
             } else {
                 activityOrder.append(id)
@@ -274,7 +284,7 @@ private struct UpdateTokenEndpoint: Codable {
     private func removeActivity(for id: String) {
         activitiesQueue.sync {
             if let activity = activities.removeValue(forKey: id) {
-                observedTokenActivityIds.remove(activity.id)
+                stopObservingPushTokenUpdates(for: activity.id)
             }
             activityOrder.removeAll { $0 == id }
         }
@@ -328,26 +338,28 @@ private struct UpdateTokenEndpoint: Codable {
         for activity: Activity<GenericAttributes>,
         logicalId id: String
     ) {
-        let shouldObserve = activitiesQueue.sync {
+        activitiesQueue.sync {
             if observedTokenActivityIds.contains(activity.id) {
-                return false
+                return
             }
             observedTokenActivityIds.insert(activity.id)
-            return true
-        }
 
-        guard shouldObserve else { return }
-
-        Task { [weak self] in
-            for await data in activity.pushTokenUpdates {
-                let token = data.map { String(format: "%02x", $0) }.joined()
-                await self?.handlePushToken(id: id, activityId: activity.id, token: token)
+            pushTokenObserverTasks[activity.id] = Task { [weak self] in
+                for await data in activity.pushTokenUpdates {
+                    let token = data.map { String(format: "%02x", $0) }.joined()
+                    await self?.handlePushToken(id: id, activityId: activity.id, token: token)
+                }
             }
         }
     }
 
+    private func stopObservingPushTokenUpdates(for activityId: String) {
+        observedTokenActivityIds.remove(activityId)
+        pushTokenObserverTasks.removeValue(forKey: activityId)?.cancel()
+    }
+
     private func handlePushToken(id: String, activityId: String, token: String) async {
-        let payload: [String: String] = [
+        let payload: [String: Any] = [
             "id": id,
             "activityId": activityId,
             "token": token,
@@ -357,7 +369,7 @@ private struct UpdateTokenEndpoint: Codable {
         await registerUpdateToken(payload: payload)
     }
 
-    private func registerUpdateToken(payload: [String: String]) async {
+    private func registerUpdateToken(payload: [String: Any]) async {
         guard let endpoint = currentUpdateTokenEndpoint(),
             let url = URL(string: endpoint.url)
         else { return }
@@ -366,7 +378,7 @@ private struct UpdateTokenEndpoint: Codable {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            endpoint.headers.forEach { key, value in
+            currentUpdateTokenHeaders().forEach { key, value in
                 request.setValue(value, forHTTPHeaderField: key)
             }
             request.httpBody = try JSONSerialization.data(withJSONObject: payload)
@@ -389,6 +401,12 @@ private struct UpdateTokenEndpoint: Codable {
     private func currentUpdateTokenEndpoint() -> UpdateTokenEndpoint? {
         endpointQueue.sync {
             updateTokenEndpoint
+        }
+    }
+
+    private func currentUpdateTokenHeaders() -> [String: String] {
+        endpointQueue.sync {
+            updateTokenHeaders
         }
     }
 

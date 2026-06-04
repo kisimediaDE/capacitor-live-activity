@@ -252,13 +252,13 @@ LiveActivity.addListener('liveActivityPushToken', (event) => {
 
 ### Native Update Token Registration
 
-Configure a backend endpoint once before starting push-enabled Live Activities. iOS persists this setting and will POST each per-activity update token natively while still emitting the existing `liveActivityPushToken` event.
+Configure a backend endpoint once before starting push-enabled Live Activities. iOS persists the endpoint URL and will POST each per-activity update token natively while still emitting the existing `liveActivityPushToken` event. Headers are used for the current app session only and are not persisted; avoid long-lived secrets in this option.
 
 ```typescript
 await LiveActivity.setUpdateTokenEndpoint({
   url: 'https://api.example.com/live-activity/register-token',
   headers: {
-    Authorization: 'Bearer <token>',
+    'X-Client': 'ios-app',
   },
 });
 
@@ -522,9 +522,10 @@ Configure a native endpoint that receives per-activity update tokens.
 
 When a `liveActivityPushToken` is received, the iOS plugin will keep emitting
 the existing event and additionally POST `{ id, activityId, token }` to this
-endpoint. The endpoint is persisted on iOS so token registration can continue
-across app launches. Network errors are logged natively and do not reject
-`startActivityWithPush`.
+endpoint. The endpoint URL is persisted on iOS so token registration can
+continue across app launches. Headers are kept in memory for the current app
+session only and should not contain long-lived secrets. Network errors are
+logged natively and do not reject `startActivityWithPush`.
 
 | Param         | Type                                                                              |
 | ------------- | --------------------------------------------------------------------------------- |
@@ -688,10 +689,10 @@ Result of listing activities.
 
 Options for native per-activity update token registration.
 
-| Prop          | Type                                                            | Description                                                               |
-| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **`url`**     | <code>string</code>                                             | Absolute HTTP(S) URL that receives the update token registration payload. |
-| **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST.                     |
+| Prop          | Type                                                            | Description                                                                                                                                      |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`url`**     | <code>string</code>                                             | Absolute HTTP(S) URL that receives the update token registration payload.                                                                        |
+| **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST for the current app session only. Headers are not persisted; avoid long-lived secrets here. |
 
 
 #### PluginListenerHandle

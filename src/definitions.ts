@@ -123,9 +123,10 @@ export interface LiveActivityPlugin {
    *
    * When a `liveActivityPushToken` is received, the iOS plugin will keep emitting
    * the existing event and additionally POST `{ id, activityId, token }` to this
-   * endpoint. The endpoint is persisted on iOS so token registration can continue
-   * across app launches. Network errors are logged natively and do not reject
-   * `startActivityWithPush`.
+   * endpoint. The endpoint URL is persisted on iOS so token registration can
+   * continue across app launches. Headers are kept in memory for the current app
+   * session only and should not contain long-lived secrets. Network errors are
+   * logged natively and do not reject `startActivityWithPush`.
    *
    * @since 8.2.0
    * @platform iOS
@@ -256,7 +257,8 @@ export interface UpdateTokenEndpointOptions {
   url: string;
 
   /**
-   * Optional HTTP headers added to the registration POST.
+   * Optional HTTP headers added to the registration POST for the current app
+   * session only. Headers are not persisted; avoid long-lived secrets here.
    */
   headers?: Record<string, string>;
 }

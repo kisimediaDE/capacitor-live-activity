@@ -5,11 +5,19 @@ import XCTest
 @testable import LiveActivityPlugin
 
 final class LiveActivityPluginTests: XCTestCase {
+    private let updateTokenEndpointKey =
+        "de.kisimedia.capacitor-live-activity.updateTokenEndpoint"
     var plugin: LiveActivity!
 
     override func setUp() {
         super.setUp()
+        UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
         plugin = LiveActivity()
+    }
+
+    override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
+        super.tearDown()
     }
 
     // Helper: skip if Funktion in der Umgebung nicht sinnvoll testbar ist
@@ -34,6 +42,35 @@ final class LiveActivityPluginTests: XCTestCase {
             _ = plugin.isAvailable()
         } else {
             XCTAssertFalse(plugin.isAvailable())
+        }
+    }
+
+    func testSetUpdateTokenEndpointRejectsNonHttpUrls() {
+        if #available(iOS 16.2, *) {
+            XCTAssertThrowsError(
+                try plugin.setUpdateTokenEndpoint(
+                    url: "ftp://example.com/live-activity/register-token",
+                    headers: [:]
+                )
+            )
+        }
+    }
+
+    func testSetUpdateTokenEndpointPersistsAndReloadsUrlOnly() throws {
+        if #available(iOS 16.2, *) {
+            try plugin.setUpdateTokenEndpoint(
+                url: "https://example.com/live-activity/register-token",
+                headers: ["Authorization": "Bearer test-token"]
+            )
+
+            let reloadedPlugin = LiveActivity()
+            let endpoint = reloadedPlugin.getUpdateTokenEndpoint()
+
+            XCTAssertEqual(
+                endpoint?["url"] as? String,
+                "https://example.com/live-activity/register-token"
+            )
+            XCTAssertEqual((endpoint?["headers"] as? [String: String])?.isEmpty, true)
         }
     }
 
