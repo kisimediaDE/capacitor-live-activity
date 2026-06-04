@@ -18,6 +18,8 @@ private struct UpdateTokenEndpoint: Codable {
     private var activityOrder: [String] = []
     private var observedTokenActivityIds = Set<String>()
     private var pushTokenObserverTasks: [String: Task<Void, Never>] = [:]
+    private var pushTokenObserverGenerations: [String: UUID] = [:]
+    private var pushTokenObservationDisabledActivityIds = Set<String>()
     private var updateTokenEndpoint: UpdateTokenEndpoint?
     private var updateTokenHeaders: [String: String] = [:]
     private let activitiesQueue = DispatchQueue(
@@ -76,11 +78,13 @@ private struct UpdateTokenEndpoint: Codable {
     }
 
     func getUpdateTokenEndpoint() -> [String: Any]? {
-        guard let endpoint = currentUpdateTokenEndpoint() else { return nil }
-        return [
-            "url": endpoint.url,
-            "headers": currentUpdateTokenHeaders(),
-        ]
+        endpointQueue.sync {
+            guard let endpoint = updateTokenEndpoint else { return nil }
+            return [
+                "url": endpoint.url,
+                "headers": updateTokenHeaders,
+            ]
+        }
     }
 
     @objc public func start(id: String, attributes: [String: String], content: [String: String])
@@ -90,7 +94,7 @@ private struct UpdateTokenEndpoint: Codable {
         let state = GenericAttributes.ContentState(values: content)
         let activity = try Activity<GenericAttributes>.request(
             attributes: attr, contentState: state, pushType: nil)
-        setActivity(activity, for: id)
+        setActivity(activity, for: id, observePushTokenUpdates: false)
     }
 
     @objc public func startActivityWithPush(
@@ -107,7 +111,7 @@ private struct UpdateTokenEndpoint: Codable {
             pushType: .token
         )
 
-        setActivity(activity, for: id)
+        setActivity(activity, for: id, observePushTokenUpdates: true)
 
         return activity.id
     }
@@ -153,7 +157,7 @@ private struct UpdateTokenEndpoint: Codable {
             start: startDate
         )
 
-        setActivity(activity, for: id)
+        setActivity(activity, for: id, observePushTokenUpdates: enablePushToUpdate)
 
         return activity.id
     }
@@ -265,29 +269,51 @@ private struct UpdateTokenEndpoint: Codable {
         }
     }
 
-    private func setActivity(_ activity: Activity<GenericAttributes>, for id: String) {
+    private func setActivity(
+        _ activity: Activity<GenericAttributes>,
+        for id: String,
+        observePushTokenUpdates shouldObservePushToken: Bool? = nil
+    ) {
+        var taskToCancel: Task<Void, Never>?
         activitiesQueue.sync {
             if let existingActivity = activities[id] {
                 if existingActivity.id != activity.id {
                     activityOrder.removeAll { $0 == id }
                     activityOrder.append(id)
-                    stopObservingPushTokenUpdates(for: existingActivity.id)
+                    taskToCancel = stopObservingPushTokenUpdatesLocked(
+                        for: existingActivity.id)
                 }
             } else {
                 activityOrder.append(id)
             }
+            if let shouldObservePushToken {
+                if shouldObservePushToken {
+                    pushTokenObservationDisabledActivityIds.remove(activity.id)
+                } else {
+                    pushTokenObservationDisabledActivityIds.insert(activity.id)
+                }
+            }
             activities[id] = activity
         }
-        observePushTokenUpdates(for: activity, logicalId: id)
+        taskToCancel?.cancel()
+
+        let shouldObserve = shouldObservePushToken ?? shouldObserveDiscoveredPushTokens(
+            for: activity.id)
+        if shouldObserve {
+            observePushTokenUpdates(for: activity, logicalId: id)
+        }
     }
 
     private func removeActivity(for id: String) {
+        var taskToCancel: Task<Void, Never>?
         activitiesQueue.sync {
             if let activity = activities.removeValue(forKey: id) {
-                stopObservingPushTokenUpdates(for: activity.id)
+                taskToCancel = stopObservingPushTokenUpdatesLocked(for: activity.id)
+                pushTokenObservationDisabledActivityIds.remove(activity.id)
             }
             activityOrder.removeAll { $0 == id }
         }
+        taskToCancel?.cancel()
     }
 
     private func activity(for id: String) -> Activity<GenericAttributes>? {
@@ -338,13 +364,21 @@ private struct UpdateTokenEndpoint: Codable {
         for activity: Activity<GenericAttributes>,
         logicalId id: String
     ) {
+        let generation = UUID()
         activitiesQueue.sync {
             if observedTokenActivityIds.contains(activity.id) {
                 return
             }
             observedTokenActivityIds.insert(activity.id)
+            pushTokenObserverGenerations[activity.id] = generation
 
             pushTokenObserverTasks[activity.id] = Task { [weak self] in
+                defer {
+                    self?.finishObservingPushTokenUpdates(
+                        for: activity.id,
+                        generation: generation
+                    )
+                }
                 for await data in activity.pushTokenUpdates {
                     let token = data.map { String(format: "%02x", $0) }.joined()
                     await self?.handlePushToken(id: id, activityId: activity.id, token: token)
@@ -353,9 +387,26 @@ private struct UpdateTokenEndpoint: Codable {
         }
     }
 
-    private func stopObservingPushTokenUpdates(for activityId: String) {
+    private func shouldObserveDiscoveredPushTokens(for activityId: String) -> Bool {
+        activitiesQueue.sync {
+            !pushTokenObservationDisabledActivityIds.contains(activityId)
+        }
+    }
+
+    private func stopObservingPushTokenUpdatesLocked(for activityId: String) -> Task<Void, Never>?
+    {
         observedTokenActivityIds.remove(activityId)
-        pushTokenObserverTasks.removeValue(forKey: activityId)?.cancel()
+        pushTokenObserverGenerations.removeValue(forKey: activityId)
+        return pushTokenObserverTasks.removeValue(forKey: activityId)
+    }
+
+    private func finishObservingPushTokenUpdates(for activityId: String, generation: UUID) {
+        activitiesQueue.sync {
+            guard pushTokenObserverGenerations[activityId] == generation else { return }
+            observedTokenActivityIds.remove(activityId)
+            pushTokenObserverGenerations.removeValue(forKey: activityId)
+            pushTokenObserverTasks.removeValue(forKey: activityId)
+        }
     }
 
     private func handlePushToken(id: String, activityId: String, token: String) async {
