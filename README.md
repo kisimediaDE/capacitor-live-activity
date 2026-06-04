@@ -296,22 +296,22 @@ The demo is designed to run on real iOS devices and showcases multiple Live Acti
 
 <docgen-index>
 
-- [`startActivity(...)`](#startactivity)
-- [`startActivityWithPush(...)`](#startactivitywithpush)
-- [`startActivityScheduled(...)`](#startactivityscheduled)
-- [`updateActivity(...)`](#updateactivity)
-- [`endActivity(...)`](#endactivity)
-- [`isAvailable()`](#isavailable)
-- [`isRunning(...)`](#isrunning)
-- [`getCurrentActivity(...)`](#getcurrentactivity)
-- [`listActivities()`](#listactivities)
-- [`observePushToStartToken()`](#observepushtostarttoken)
-- [`setUpdateTokenEndpoint(...)`](#setupdatetokenendpoint)
-- [`addListener('liveActivityPushToken', ...)`](#addlistenerliveactivitypushtoken-)
-- [`addListener('liveActivityPushToStartToken', ...)`](#addlistenerliveactivitypushtostarttoken-)
-- [`addListener('liveActivityUpdate', ...)`](#addlistenerliveactivityupdate-)
-- [Interfaces](#interfaces)
-- [Type Aliases](#type-aliases)
+* [`startActivity(...)`](#startactivity)
+* [`startActivityWithPush(...)`](#startactivitywithpush)
+* [`startActivityScheduled(...)`](#startactivityscheduled)
+* [`updateActivity(...)`](#updateactivity)
+* [`endActivity(...)`](#endactivity)
+* [`isAvailable()`](#isavailable)
+* [`isRunning(...)`](#isrunning)
+* [`getCurrentActivity(...)`](#getcurrentactivity)
+* [`listActivities()`](#listactivities)
+* [`observePushToStartToken()`](#observepushtostarttoken)
+* [`setUpdateTokenEndpoint(...)`](#setupdatetokenendpoint)
+* [`addListener('liveActivityPushToken', ...)`](#addlistenerliveactivitypushtoken-)
+* [`addListener('liveActivityPushToStartToken', ...)`](#addlistenerliveactivitypushtostarttoken-)
+* [`addListener('liveActivityUpdate', ...)`](#addlistenerliveactivityupdate-)
+* [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -332,7 +332,8 @@ Start a new Live Activity with local (on-device) ActivityKit.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### startActivityWithPush(...)
 
@@ -353,7 +354,8 @@ the `"liveActivityPushToken"` event shortly after starting.
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### startActivityScheduled(...)
 
@@ -377,7 +379,8 @@ The activity state will be `pending` until the scheduled start time.
 
 **Since:** 8.1.0
 
----
+--------------------
+
 
 ### updateActivity(...)
 
@@ -393,7 +396,8 @@ Update an existing Live Activity (identified by your logical `id`).
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### endActivity(...)
 
@@ -411,7 +415,8 @@ Optionally provide a final state and a dismissal policy.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### isAvailable()
 
@@ -427,7 +432,8 @@ Return whether Live Activities are enabled and allowed on this device.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### isRunning(...)
 
@@ -447,7 +453,8 @@ Return whether a Live Activity with the given logical `id` is currently running.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### getCurrentActivity(...)
 
@@ -468,7 +475,8 @@ If no `id` is given, returns the most recently started activity.
 
 **Since:** 0.0.1
 
----
+--------------------
+
 
 ### listActivities()
 
@@ -486,7 +494,8 @@ becomes aware of them.
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### observePushToStartToken()
 
@@ -500,7 +509,8 @@ The token will be emitted via `"liveActivityPushToStartToken"`.
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### setUpdateTokenEndpoint(...)
 
@@ -522,7 +532,8 @@ across app launches. Network errors are logged natively and do not reject
 
 **Since:** 8.2.0
 
----
+--------------------
+
 
 ### addListener('liveActivityPushToken', ...)
 
@@ -542,7 +553,8 @@ after calling `startActivityWithPush`.
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### addListener('liveActivityPushToStartToken', ...)
 
@@ -561,7 +573,8 @@ Emitted when a global **push-to-start** token is available (iOS 17.2+).
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### addListener('liveActivityUpdate', ...)
 
@@ -580,9 +593,11 @@ Emitted when the lifecycle of a Live Activity changes (e.g. active → stale).
 
 **Since:** 7.1.0
 
----
+--------------------
+
 
 ### Interfaces
+
 
 #### StartActivityOptions
 
@@ -594,6 +609,7 @@ Options for starting a Live Activity.
 | **`attributes`**   | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Immutable attributes for the activity.                |
 | **`contentState`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Initial dynamic content state.                        |
 | **`timestamp`**    | <code>number</code>                                             | Optional UNIX timestamp when the activity started.    |
+
 
 #### ScheduledActivityOptions
 
@@ -609,6 +625,7 @@ Options for scheduling a Live Activity to start at a future date (iOS 26+).
 | **`enablePushToUpdate`** | <code>boolean</code>                                              | Whether to enable push notifications for this activity. If true, the activity will receive push token updates via the `liveActivityPushToken` event.                                                                    | <code>false</code>      |
 | **`style`**              | <code>'standard' \| 'transient'</code>                            | Activity style: 'standard' or 'transient'. - 'standard': Activity continues until explicitly ended or max duration reached. - 'transient': Activity appears in Dynamic Island but ends automatically when device locks. | <code>'standard'</code> |
 
+
 #### AlertConfiguration
 
 Alert configuration shown for certain updates.
@@ -618,6 +635,7 @@ Alert configuration shown for certain updates.
 | **`title`** | <code>string</code> | Optional title of the alert.           |
 | **`body`**  | <code>string</code> | Optional body text of the alert.       |
 | **`sound`** | <code>string</code> | Optional sound file name or "default". |
+
 
 #### UpdateActivityOptions
 
@@ -629,6 +647,7 @@ Options for updating a Live Activity.
 | **`contentState`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code>   | Updated dynamic content state.                                                   |
 | **`alert`**        | <code><a href="#alertconfiguration">AlertConfiguration</a></code> | Optional alert configuration to show a notification banner or Apple Watch alert. |
 | **`timestamp`**    | <code>number</code>                                               | Optional UNIX timestamp for the update.                                          |
+
 
 #### EndActivityOptions
 
@@ -642,6 +661,7 @@ Options for ending a Live Activity.
 | **`dismissalDate`**   | <code>number</code>                                             | Optional future dismissal time (UNIX). If provided without `dismissalPolicy`, the `after` dismissal policy applies.                                                                                                                                                                                                                                                             |
 | **`dismissalPolicy`** | <code>'default' \| 'immediate' \| 'after'</code>                | Optional dismissal policy. - `default`: the system default dismissal behavior. - `immediate`: dismiss the Live Activity immediately after ending it. - `after`: dismiss the Live Activity after `dismissalDate`; requires `dismissalDate`. If omitted, `dismissalDate` still maps to `after` for backward compatibility; otherwise the system default dismissal policy applies. |
 
+
 #### LiveActivityState
 
 Represents the state of a Live Activity returned by the plugin.
@@ -654,6 +674,7 @@ Represents the state of a Live Activity returned by the plugin.
 | **`isEnded`**   | <code>boolean</code>                                            | Whether the activity has ended.                        |
 | **`startedAt`** | <code>string</code>                                             | ISO string of when the activity started (if provided). |
 
+
 #### ListActivitiesResult
 
 Result of listing activities.
@@ -661,6 +682,7 @@ Result of listing activities.
 | Prop        | Type                                                              |
 | ----------- | ----------------------------------------------------------------- |
 | **`items`** | <code>{ id: string; activityId: string; state: string; }[]</code> |
+
 
 #### UpdateTokenEndpointOptions
 
@@ -671,11 +693,13 @@ Options for native per-activity update token registration.
 | **`url`**     | <code>string</code>                                             | Absolute HTTP(S) URL that receives the update token registration payload. |
 | **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST.                     |
 
+
 #### PluginListenerHandle
 
 | Prop         | Type                                      |
 | ------------ | ----------------------------------------- |
 | **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
 
 #### PushTokenEvent
 
@@ -687,6 +711,7 @@ Event payload for per-activity live-activity push tokens.
 | **`activityId`** | <code>string</code> | System activity identifier (Activity.id).                   |
 | **`token`**      | <code>string</code> | Hex-encoded APNs/FCM live activity token for this activity. |
 
+
 #### PushToStartTokenEvent
 
 Event payload for the global push-to-start token (iOS 17.2+).
@@ -694,6 +719,7 @@ Event payload for the global push-to-start token (iOS 17.2+).
 | Prop        | Type                | Description                                           |
 | ----------- | ------------------- | ----------------------------------------------------- |
 | **`token`** | <code>string</code> | Hex-encoded APNs/FCM push-to-start token (iOS 17.2+). |
+
 
 #### ActivityUpdateEvent
 
@@ -705,14 +731,14 @@ Event payload for activity lifecycle updates.
 | **`activityId`** | <code>string</code> | System activity identifier (Activity.id). |
 | **`state`**      | <code>string</code> | ActivityKit state as a string.            |
 
+
 ### Type Aliases
+
 
 #### Record
 
 Construct a type with a set of properties K of type T
 
-<code>{
- [P in K]: T;
- }</code>
+<code>{ [P in K]: T; }</code>
 
 </docgen-api>

@@ -261,6 +261,7 @@ private struct UpdateTokenEndpoint: Codable {
                 if existingActivity.id != activity.id {
                     activityOrder.removeAll { $0 == id }
                     activityOrder.append(id)
+                    observedTokenActivityIds.remove(existingActivity.id)
                 }
             } else {
                 activityOrder.append(id)
@@ -272,7 +273,9 @@ private struct UpdateTokenEndpoint: Codable {
 
     private func removeActivity(for id: String) {
         activitiesQueue.sync {
-            _ = activities.removeValue(forKey: id)
+            if let activity = activities.removeValue(forKey: id) {
+                observedTokenActivityIds.remove(activity.id)
+            }
             activityOrder.removeAll { $0 == id }
         }
     }
