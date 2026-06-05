@@ -7,16 +7,20 @@ import XCTest
 final class LiveActivityPluginTests: XCTestCase {
     private let updateTokenEndpointKey =
         "de.kisimedia.capacitor-live-activity.updateTokenEndpoint"
+    private let cachedUpdateTokensKey =
+        "de.kisimedia.capacitor-live-activity.cachedUpdateTokens"
     var plugin: LiveActivity!
 
     override func setUp() {
         super.setUp()
         UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
+        UserDefaults.standard.removeObject(forKey: cachedUpdateTokensKey)
         plugin = LiveActivity()
     }
 
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
+        UserDefaults.standard.removeObject(forKey: cachedUpdateTokensKey)
         super.tearDown()
     }
 
@@ -106,6 +110,33 @@ final class LiveActivityPluginTests: XCTestCase {
                 "https://example.com/live-activity/register-token"
             )
             XCTAssertEqual((endpoint?["headers"] as? [String: String])?.isEmpty, true)
+        }
+    }
+
+    func testGetActivityPushTokensReturnsPersistedTokens() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = [
+                "activity-1": [
+                    "id": "logical-1",
+                    "activityId": "activity-1",
+                    "token": "abc123",
+                ],
+                "activity-2": [
+                    "id": "logical-2",
+                    "activityId": "activity-2",
+                    "token": "def456",
+                ],
+            ]
+            let data = try JSONEncoder().encode(cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+
+            XCTAssertEqual(reloadedPlugin.getActivityPushTokens(id: nil).count, 2)
+            XCTAssertEqual(
+                reloadedPlugin.getActivityPushTokens(id: "logical-2").first?["token"],
+                "def456"
+            )
         }
     }
 

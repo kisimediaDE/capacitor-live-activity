@@ -133,6 +133,19 @@ export interface LiveActivityPlugin {
    */
   setUpdateTokenEndpoint(options: UpdateTokenEndpointOptions): Promise<void>;
 
+  /**
+   * Return cached per-activity update tokens that iOS has already received.
+   *
+   * Use this as a fallback when `liveActivityPushToken` was emitted while the
+   * WebView was not running, for example after a Live Activity was started via
+   * push-to-start in the background. Pass `id` to filter by your logical
+   * activity id.
+   *
+   * @since 8.2.0
+   * @platform iOS
+   */
+  getActivityPushTokens(options?: { id?: string }): Promise<GetActivityPushTokensResult>;
+
   // ---------- Events ----------
 
   /**
@@ -393,6 +406,15 @@ export interface ListActivitiesResult {
     /** ActivityKit state as a string ("active" | "stale" | "pending" | "ended" | "dismissed"). */
     state: string;
   }[];
+}
+
+/**
+ * Result of listing cached per-activity update tokens.
+ * @since 8.2.0
+ * @platform iOS
+ */
+export interface GetActivityPushTokensResult {
+  items: PushTokenEvent[];
 }
 
 /**
