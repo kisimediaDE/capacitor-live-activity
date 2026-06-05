@@ -88,6 +88,36 @@ window.observeActivityTokens = async () => {
   }
 };
 
+window.configureUpdateTokenEndpoint = async () => {
+  try {
+    await LiveActivity.setUpdateTokenEndpoint({
+      url: `${base()}/live-activity/register-token`,
+    });
+    log('🌐 Native update token endpoint registered.');
+  } catch (e) {
+    log('❌ configureUpdateTokenEndpoint: ' + e.message);
+  }
+};
+
+window.loadCachedActivityTokens = async () => {
+  try {
+    const attrs = JSON.parse($('attrs').value || '{}');
+    const id = attrs.id;
+    const { items } = await LiveActivity.getActivityPushTokens(id ? { id } : undefined);
+    const latest = items.at(-1);
+    if (!latest) {
+      log('ℹ️ No cached activity push token found.');
+      return;
+    }
+
+    $('push').value = latest.token;
+    localStorage.setItem(LS.PUSH, latest.token);
+    log(`📥 Cached activity push token for "${latest.id}" loaded.`);
+  } catch (e) {
+    log('❌ loadCachedActivityTokens: ' + e.message);
+  }
+};
+
 function base() { return ( $('base-url').value || '' ).trim(); }
 function fcm() { return ( $('fcm').value || '' ).trim(); }
 function p2s() { return ( $('p2s').value || '' ).trim(); }
