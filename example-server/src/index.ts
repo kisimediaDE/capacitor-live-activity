@@ -99,14 +99,18 @@ async function sendLiveActivityFCM(args: {
   liveActivityToken: string;
   aps: Record<string, unknown>;
 }) {
-  const APP_BUNDLE_ID = process.env.APP_BUNDLE_ID!;
+  const appBundleId = process.env.APP_BUNDLE_ID;
+  if (!appBundleId) {
+    throw new Error('APP_BUNDLE_ID is required to send Live Activity pushes');
+  }
+
   const message: admin.messaging.Message = {
     token: args.fcmToken,
     apns: {
       liveActivityToken: args.liveActivityToken,
       headers: {
         'apns-push-type': 'liveactivity',
-        'apns-topic': `${APP_BUNDLE_ID}.push-type.liveactivity`,
+        'apns-topic': `${appBundleId}.push-type.liveactivity`,
         'apns-priority': '10',
       },
       payload: { aps: args.aps },

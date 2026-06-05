@@ -5,27 +5,22 @@ import { WebPlugin } from '@capacitor/core';
 
 import type {
   LiveActivityPlugin,
-  StartActivityOptions,
-  ScheduledActivityOptions,
-  UpdateActivityOptions,
-  EndActivityOptions,
   LiveActivityState,
   ListActivitiesResult,
   GetActivityPushTokensResult,
-  UpdateTokenEndpointOptions,
 } from './definitions';
 
 export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
   // ---- Local APIs ----
-  async startActivity(_options: StartActivityOptions): Promise<void> {
+  async startActivity(): Promise<void> {
     console.warn('LiveActivity: startActivity is only available on iOS.');
   }
 
-  async updateActivity(_options: UpdateActivityOptions): Promise<void> {
+  async updateActivity(): Promise<void> {
     console.warn('LiveActivity: updateActivity is only available on iOS.');
   }
 
-  async endActivity(_options: EndActivityOptions): Promise<void> {
+  async endActivity(): Promise<void> {
     console.warn('LiveActivity: endActivity is only available on iOS.');
   }
 
@@ -34,7 +29,7 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
     return { value: false };
   }
 
-  async isRunning(_options: { id: string }): Promise<{ value: boolean }> {
+  async isRunning(): Promise<{ value: boolean }> {
     console.warn('LiveActivity: isRunning is only available on iOS.');
     return { value: false };
   }
@@ -45,12 +40,12 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
   }
 
   // ---- Push-capable APIs ----
-  async startActivityWithPush(_options: StartActivityOptions): Promise<{ activityId: string }> {
+  async startActivityWithPush(): Promise<{ activityId: string }> {
     console.warn('[LiveActivity] startActivityWithPush is only available on iOS.');
     return { activityId: '' };
   }
 
-  async startActivityScheduled(_options: ScheduledActivityOptions): Promise<{ activityId: string }> {
+  async startActivityScheduled(): Promise<{ activityId: string }> {
     console.warn('[LiveActivity] startActivityScheduled is only available on iOS 26+.');
     return { activityId: '' };
   }
@@ -64,11 +59,11 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
     console.warn('[LiveActivity] observePushToStartToken is only available on iOS.');
   }
 
-  async setUpdateTokenEndpoint(_options: UpdateTokenEndpointOptions): Promise<void> {
+  async setUpdateTokenEndpoint(): Promise<void> {
     console.warn('[LiveActivity] setUpdateTokenEndpoint is only available on iOS.');
   }
 
-  async getActivityPushTokens(_options?: { id?: string }): Promise<GetActivityPushTokensResult> {
+  async getActivityPushTokens(): Promise<GetActivityPushTokensResult> {
     console.warn('[LiveActivity] getActivityPushTokens is only available on iOS.');
     return { items: [] };
   }
