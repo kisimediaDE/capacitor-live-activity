@@ -18,7 +18,7 @@ window.onload = () => {
   $('push').value = localStorage.getItem(LS.PUSH) || '';
 
   // sinnvolle Defaults
-  $('attributes-type').value = 'LiveActivityWidgetExtension.GenericAttributes';
+  $('attributes-type').value = 'GenericAttributes';
   $('attrs').value = JSON.stringify({ id: 'demo-remote', staticValues: { type: 'delivery', title: '📦 Delivery' } }, null, 2);
   $('content').value = JSON.stringify({ status: 'Starting…', eta: '20 min' }, null, 2);
   $('alert').value = JSON.stringify({ title: 'Live Activity', body: 'Started remotely' }, null, 2);
