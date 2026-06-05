@@ -577,7 +577,6 @@ private struct CachedUpdateToken: Codable {
         return Dictionary(
             uniqueKeysWithValues: legacyTokens.compactMap { activityId, token in
                 guard let id = token["id"],
-                    let tokenActivityId = token["activityId"],
                     let tokenValue = token["token"]
                 else {
                     return nil
@@ -587,7 +586,7 @@ private struct CachedUpdateToken: Codable {
                     activityId,
                     CachedUpdateToken(
                         id: id,
-                        activityId: tokenActivityId,
+                        activityId: activityId,
                         token: tokenValue,
                         cachedAt: 0
                     )

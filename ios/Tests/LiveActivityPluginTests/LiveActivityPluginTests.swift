@@ -140,6 +140,25 @@ final class LiveActivityPluginTests: XCTestCase {
         }
     }
 
+    func testGetActivityPushTokensMigratesLegacyTokensUsingDictionaryKeyActivityId() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = [
+                "activity-key": [
+                    "id": "logical-1",
+                    "token": "abc123",
+                ]
+            ]
+            let data = try JSONEncoder().encode(cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let token = reloadedPlugin.getActivityPushTokens(id: "logical-1").first
+
+            XCTAssertEqual(token?["activityId"], "activity-key")
+            XCTAssertEqual(token?["token"], "abc123")
+        }
+    }
+
     func testGetActivityPushTokensSortsByCachedAtWithoutExposingTimestamp() throws {
         if #available(iOS 16.2, *) {
             let cachedTokens: [String: [String: Any]] = [
