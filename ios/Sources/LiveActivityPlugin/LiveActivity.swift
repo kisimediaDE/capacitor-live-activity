@@ -45,6 +45,13 @@ private struct CachedUpdateToken: Codable {
         super.init()
         updateTokenEndpoint = Self.loadUpdateTokenEndpoint()
         cachedUpdateTokens = Self.loadCachedUpdateTokens()
+        tokenCacheQueue.sync {
+            let prunedTokens = Self.prunedCachedUpdateTokens(cachedUpdateTokens)
+            if prunedTokens.count != cachedUpdateTokens.count {
+                cachedUpdateTokens = prunedTokens
+                Self.saveCachedUpdateTokens(cachedUpdateTokens)
+            }
+        }
 
         Task {
             for activity in Activity<GenericAttributes>.activities {
@@ -476,6 +483,13 @@ private struct CachedUpdateToken: Codable {
 
     private func cacheUpdateToken(id: String, activityId: String, token: String) {
         tokenCacheQueue.sync {
+            if let existing = cachedUpdateTokens[activityId],
+                existing.id == id,
+                existing.token == token
+            {
+                return
+            }
+
             cachedUpdateTokens[activityId] = CachedUpdateToken(
                 id: id,
                 activityId: activityId,
@@ -490,17 +504,7 @@ private struct CachedUpdateToken: Codable {
     private func pruneCachedUpdateTokens() {
         guard cachedUpdateTokens.count > Self.maxCachedUpdateTokens else { return }
 
-        cachedUpdateTokens = Dictionary(
-            uniqueKeysWithValues: cachedUpdateTokens.values
-                .sorted { left, right in
-                    if left.cachedAt == right.cachedAt {
-                        return left.activityId > right.activityId
-                    }
-                    return left.cachedAt > right.cachedAt
-                }
-                .prefix(Self.maxCachedUpdateTokens)
-                .map { ($0.activityId, $0) }
-        )
+        cachedUpdateTokens = Self.prunedCachedUpdateTokens(cachedUpdateTokens)
     }
 
     private func registerUpdateToken(payload: [String: Any]) async {
@@ -592,7 +596,18 @@ private struct CachedUpdateToken: Codable {
     }
 
     private static func saveCachedUpdateTokens(_ tokens: [String: CachedUpdateToken]) {
-        let prunedTokens = Dictionary(
+        let prunedTokens = prunedCachedUpdateTokens(tokens)
+
+        guard let data = try? JSONEncoder().encode(prunedTokens) else { return }
+        UserDefaults.standard.set(data, forKey: CACHED_UPDATE_TOKENS_KEY)
+    }
+
+    private static func prunedCachedUpdateTokens(
+        _ tokens: [String: CachedUpdateToken]
+    ) -> [String: CachedUpdateToken] {
+        guard tokens.count > maxCachedUpdateTokens else { return tokens }
+
+        return Dictionary(
             uniqueKeysWithValues: tokens.values
                 .sorted { left, right in
                     if left.cachedAt == right.cachedAt {
@@ -603,9 +618,6 @@ private struct CachedUpdateToken: Codable {
                 .prefix(maxCachedUpdateTokens)
                 .map { ($0.activityId, $0) }
         )
-
-        guard let data = try? JSONEncoder().encode(prunedTokens) else { return }
-        UserDefaults.standard.set(data, forKey: CACHED_UPDATE_TOKENS_KEY)
     }
 
     private static func isLoopbackHost(_ host: String?) -> Bool {

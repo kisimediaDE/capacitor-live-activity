@@ -167,6 +167,32 @@ final class LiveActivityPluginTests: XCTestCase {
         }
     }
 
+    func testGetActivityPushTokensPrunesPersistedCacheOnStartup() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = Dictionary(
+                uniqueKeysWithValues: (0..<55).map { index in
+                    (
+                        "activity-\(index)",
+                        [
+                            "id": "logical-\(index)",
+                            "activityId": "activity-\(index)",
+                            "token": "token-\(index)",
+                            "cachedAt": Double(index),
+                        ] as [String: Any]
+                    )
+                })
+            let data = try JSONSerialization.data(withJSONObject: cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let tokens = reloadedPlugin.getActivityPushTokens(id: nil)
+
+            XCTAssertEqual(tokens.count, 50)
+            XCTAssertNil(tokens.first { $0["activityId"] == "activity-0" })
+            XCTAssertNotNil(tokens.first { $0["activityId"] == "activity-54" })
+        }
+    }
+
     func testStartAndGetCurrent() async throws {
         if #available(iOS 16.2, *) {
             try skipIfActivitiesUnavailable()
