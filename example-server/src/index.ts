@@ -194,6 +194,31 @@ const UpdateSchema = z.object({
   timestamp: z.number().finite().optional(),
 });
 
+const RegisterTokenSchema = z.object({
+  id: z.string().min(1),
+  activityId: z.string().min(1),
+  token: z.string().min(1),
+});
+
+app.post('/live-activity/register-token', async (req, res) => {
+  logHeader('Live Activity TOKEN: new /live-activity/register-token POST');
+  logObj('Incoming req.body', req.body);
+  try {
+    const data = RegisterTokenSchema.parse(req.body);
+    logObj('Parsed update token registration', data);
+    res.json({ ok: true });
+  } catch (err) {
+    logHeader('ERROR in /live-activity/register-token');
+    if (err instanceof Error && err.stack) {
+      console.error(err.stack);
+      res.status(400).json({ ok: false, error: err.message });
+    } else {
+      console.error(err);
+      res.status(400).json({ ok: false, error: 'Unknown error' });
+    }
+  }
+});
+
 app.post('/live-activity/update', async (req, res) => {
   logHeader('Live Activity UPDATE: new /live-activity/update POST');
   logObj('Incoming req.body', req.body);

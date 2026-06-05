@@ -1,77 +1,77 @@
 {
-	"name": "capacitor-live-activity",
-	"version": "8.1.0",
-	"description": "A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.",
-	"main": "dist/plugin.cjs.js",
-	"module": "dist/esm/index.js",
-	"types": "dist/esm/index.d.ts",
-	"unpkg": "dist/plugin.js",
-	"files": [
-		"dist/",
-		"ios/Sources",
-		"ios/Tests",
-		"Package.swift",
-		"CapacitorLiveActivity.podspec"
-	],
-	"author": "Kisimedia.de",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/kisimediaDE/capacitor-live-activity.git"
-	},
-	"bugs": {
-		"url": "https://github.com/kisimediaDE/capacitor-live-activity/issues"
-	},
-	"keywords": [
-		"capacitor",
-		"live-activity",
-		"activitykit",
-		"ios",
-		"plugin",
-		"swift",
-		"capacitor-plugin"
-	],
-	"scripts": {
-		"verify": "npm run verify:ios && npm run verify:web",
-		"verify:ios": "xcodebuild -scheme CapacitorLiveActivity -destination generic/platform=iOS",
-		"verify:web": "npm run build",
-		"lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
-		"fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
-		"eslint": "eslint . --ext ts",
-		"prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
-		"swiftlint": "node-swiftlint",
-		"docgen": "docgen --api LiveActivityPlugin --output-readme README.md --output-json dist/docs.json",
-		"build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
-		"clean": "rimraf ./dist",
-		"watch": "tsc --watch",
-		"prepublishOnly": "npm run build"
-	},
-	"devDependencies": {
-		"@capacitor/core": "^8.0.0",
-		"@capacitor/docgen": "^0.3.1",
-		"@capacitor/ios": "^8.0.0",
-		"@ionic/eslint-config": "^0.4.0",
-		"@ionic/prettier-config": "^4.0.0",
-		"@ionic/swiftlint-config": "^2.0.0",
-		"eslint": "^8.57.1",
-		"prettier": "^3.8.3",
-		"prettier-plugin-java": "^2.8.1",
-		"rimraf": "^6.1.3",
-		"rollup": "^4.56.0",
-		"swiftlint": "^2.0.0",
-		"typescript": "^5.9.3"
-	},
-	"peerDependencies": {
-		"@capacitor/core": ">=8.0.0"
-	},
-	"prettier": "@ionic/prettier-config",
-	"swiftlint": "@ionic/swiftlint-config",
-	"eslintConfig": {
-		"extends": "@ionic/eslint-config/recommended"
-	},
-	"capacitor": {
-		"ios": {
-			"src": "ios"
-		}
-	}
+  "name": "capacitor-live-activity",
+  "version": "8.2.0",
+  "description": "A Capacitor plugin for managing iOS Live Activities using ActivityKit and Swift.",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "dist/",
+    "ios/Sources",
+    "ios/Tests",
+    "Package.swift",
+    "CapacitorLiveActivity.podspec"
+  ],
+  "author": "Kisimedia.de",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kisimediaDE/capacitor-live-activity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kisimediaDE/capacitor-live-activity/issues"
+  },
+  "keywords": [
+    "capacitor",
+    "live-activity",
+    "activitykit",
+    "ios",
+    "plugin",
+    "swift",
+    "capacitor-plugin"
+  ],
+  "scripts": {
+    "verify": "npm run verify:ios && npm run verify:web",
+    "verify:ios": "xcodebuild -scheme CapacitorLiveActivity -destination generic/platform=iOS",
+    "verify:web": "npm run build",
+    "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
+    "fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
+    "eslint": "eslint . --ext ts",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
+    "swiftlint": "node-swiftlint",
+    "docgen": "docgen --api LiveActivityPlugin --output-readme README.md --output-json dist/docs.json",
+    "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
+    "clean": "rimraf ./dist",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/docgen": "^0.3.1",
+    "@capacitor/ios": "^8.0.0",
+    "@ionic/eslint-config": "^0.4.0",
+    "@ionic/prettier-config": "^4.0.0",
+    "@ionic/swiftlint-config": "^2.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "prettier-plugin-java": "^2.8.1",
+    "rimraf": "^6.1.3",
+    "rollup": "^4.56.0",
+    "swiftlint": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@capacitor/core": ">=8.0.0"
+  },
+  "prettier": "@ionic/prettier-config",
+  "swiftlint": "@ionic/swiftlint-config",
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    }
+  }
 }

@@ -118,6 +118,21 @@ export interface LiveActivityPlugin {
    */
   observePushToStartToken(): Promise<void>;
 
+  /**
+   * Configure a native endpoint that receives per-activity update tokens.
+   *
+   * When a `liveActivityPushToken` is received, the iOS plugin will keep emitting
+   * the existing event and additionally POST `{ id, activityId, token }` to this
+   * endpoint. The endpoint URL is persisted on iOS so token registration can
+   * continue across app launches. Headers are kept in memory for the current app
+   * session only and should not contain long-lived secrets. Network errors are
+   * logged natively and do not reject `startActivityWithPush`.
+   *
+   * @since 8.2.0
+   * @platform iOS
+   */
+  setUpdateTokenEndpoint(options: UpdateTokenEndpointOptions): Promise<void>;
+
   // ---------- Events ----------
 
   /**
@@ -228,6 +243,26 @@ export interface ScheduledActivityOptions {
    * @default 'standard'
    */
   style?: 'standard' | 'transient';
+}
+
+/**
+ * Options for native per-activity update token registration.
+ * @since 8.2.0
+ * @platform iOS
+ */
+export interface UpdateTokenEndpointOptions {
+  /**
+   * Absolute HTTPS URL that receives the update token registration payload.
+   * On iOS, HTTP is accepted only for loopback development hosts
+   * (`localhost`, `127.0.0.1`, `::1`).
+   */
+  url: string;
+
+  /**
+   * Optional HTTP headers added to the registration POST for the current app
+   * session only. Headers are not persisted; avoid long-lived secrets here.
+   */
+  headers?: Record<string, string>;
 }
 
 /**

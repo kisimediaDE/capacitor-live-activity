@@ -11,6 +11,7 @@ import type {
   EndActivityOptions,
   LiveActivityState,
   ListActivitiesResult,
+  UpdateTokenEndpointOptions,
 } from './definitions';
 
 export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
@@ -60,5 +61,9 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
 
   async observePushToStartToken(): Promise<void> {
     console.warn('[LiveActivity] observePushToStartToken is only available on iOS.');
+  }
+
+  async setUpdateTokenEndpoint(_options: UpdateTokenEndpointOptions): Promise<void> {
+    console.warn('[LiveActivity] setUpdateTokenEndpoint is only available on iOS.');
   }
 }
