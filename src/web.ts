@@ -68,7 +68,7 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
     console.warn('[LiveActivity] setUpdateTokenEndpoint is only available on iOS.');
   }
 
-  async getActivityPushTokens(): Promise<GetActivityPushTokensResult> {
+  async getActivityPushTokens(_options?: { id?: string }): Promise<GetActivityPushTokensResult> {
     console.warn('[LiveActivity] getActivityPushTokens is only available on iOS.');
     return { items: [] };
   }

@@ -140,6 +140,33 @@ final class LiveActivityPluginTests: XCTestCase {
         }
     }
 
+    func testGetActivityPushTokensSortsByCachedAtWithoutExposingTimestamp() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens: [String: [String: Any]] = [
+                "activity-new": [
+                    "id": "logical-1",
+                    "activityId": "activity-new",
+                    "token": "new-token",
+                    "cachedAt": 200.0,
+                ],
+                "activity-old": [
+                    "id": "logical-1",
+                    "activityId": "activity-old",
+                    "token": "old-token",
+                    "cachedAt": 100.0,
+                ],
+            ]
+            let data = try JSONSerialization.data(withJSONObject: cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let tokens = reloadedPlugin.getActivityPushTokens(id: "logical-1")
+
+            XCTAssertEqual(tokens.map { $0["token"] }, ["old-token", "new-token"])
+            XCTAssertNil(tokens.last?["cachedAt"])
+        }
+    }
+
     func testStartAndGetCurrent() async throws {
         if #available(iOS 16.2, *) {
             try skipIfActivitiesUnavailable()

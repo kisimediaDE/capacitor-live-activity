@@ -14,8 +14,16 @@ private struct UpdateTokenEndpoint: Codable {
     let url: String
 }
 
+private struct CachedUpdateToken: Codable {
+    let id: String
+    let activityId: String
+    let token: String
+    let cachedAt: TimeInterval
+}
+
 @available(iOS 16.2, *)
 @objc public class LiveActivity: NSObject {
+    private static let maxCachedUpdateTokens = 50
     private var activities: [String: Activity<GenericAttributes>] = [:]
     private var activityOrder: [String] = []
     private var observedTokenActivityIds = Set<String>()
@@ -24,7 +32,7 @@ private struct UpdateTokenEndpoint: Codable {
     private var pushTokenObservationDisabledActivityIds = Set<String>()
     private var updateTokenEndpoint: UpdateTokenEndpoint?
     private var updateTokenHeaders: [String: String] = [:]
-    private var cachedUpdateTokens: [String: [String: String]] = [:]
+    private var cachedUpdateTokens: [String: CachedUpdateToken] = [:]
     private let activitiesQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.activities")
     private let endpointQueue = DispatchQueue(
@@ -96,16 +104,24 @@ private struct UpdateTokenEndpoint: Codable {
 
     @objc public func getActivityPushTokens(id: String?) -> [[String: String]] {
         tokenCacheQueue.sync {
-            let tokens = cachedUpdateTokens.values
+            cachedUpdateTokens.values
                 .filter { token in
                     guard let id else { return true }
-                    return token["id"] == id
+                    return token.id == id
                 }
                 .sorted { left, right in
-                    (left["activityId"] ?? "") < (right["activityId"] ?? "")
+                    if left.cachedAt == right.cachedAt {
+                        return left.activityId < right.activityId
+                    }
+                    return left.cachedAt < right.cachedAt
                 }
-
-            return Array(tokens)
+                .map { token in
+                    [
+                        "id": token.id,
+                        "activityId": token.activityId,
+                        "token": token.token,
+                    ]
+                }
         }
     }
 
@@ -460,13 +476,31 @@ private struct UpdateTokenEndpoint: Codable {
 
     private func cacheUpdateToken(id: String, activityId: String, token: String) {
         tokenCacheQueue.sync {
-            cachedUpdateTokens[activityId] = [
-                "id": id,
-                "activityId": activityId,
-                "token": token,
-            ]
+            cachedUpdateTokens[activityId] = CachedUpdateToken(
+                id: id,
+                activityId: activityId,
+                token: token,
+                cachedAt: Date().timeIntervalSince1970
+            )
+            pruneCachedUpdateTokens()
             Self.saveCachedUpdateTokens(cachedUpdateTokens)
         }
+    }
+
+    private func pruneCachedUpdateTokens() {
+        guard cachedUpdateTokens.count > Self.maxCachedUpdateTokens else { return }
+
+        cachedUpdateTokens = Dictionary(
+            uniqueKeysWithValues: cachedUpdateTokens.values
+                .sorted { left, right in
+                    if left.cachedAt == right.cachedAt {
+                        return left.activityId > right.activityId
+                    }
+                    return left.cachedAt > right.cachedAt
+                }
+                .prefix(Self.maxCachedUpdateTokens)
+                .map { ($0.activityId, $0) }
+        )
     }
 
     private func registerUpdateToken(payload: [String: Any]) async {
@@ -521,16 +555,56 @@ private struct UpdateTokenEndpoint: Codable {
         UserDefaults.standard.set(data, forKey: UPDATE_TOKEN_ENDPOINT_KEY)
     }
 
-    private static func loadCachedUpdateTokens() -> [String: [String: String]] {
+    private static func loadCachedUpdateTokens() -> [String: CachedUpdateToken] {
         guard let data = UserDefaults.standard.data(forKey: CACHED_UPDATE_TOKENS_KEY) else {
             return [:]
         }
 
-        return (try? JSONDecoder().decode([String: [String: String]].self, from: data)) ?? [:]
+        if let tokens = try? JSONDecoder().decode([String: CachedUpdateToken].self, from: data) {
+            return tokens
+        }
+
+        guard let legacyTokens = try? JSONDecoder().decode(
+            [String: [String: String]].self, from: data)
+        else {
+            return [:]
+        }
+
+        return Dictionary(
+            uniqueKeysWithValues: legacyTokens.compactMap { activityId, token in
+                guard let id = token["id"],
+                    let tokenActivityId = token["activityId"],
+                    let tokenValue = token["token"]
+                else {
+                    return nil
+                }
+
+                return (
+                    activityId,
+                    CachedUpdateToken(
+                        id: id,
+                        activityId: tokenActivityId,
+                        token: tokenValue,
+                        cachedAt: 0
+                    )
+                )
+            })
     }
 
-    private static func saveCachedUpdateTokens(_ tokens: [String: [String: String]]) {
-        guard let data = try? JSONEncoder().encode(tokens) else { return }
+    private static func saveCachedUpdateTokens(_ tokens: [String: CachedUpdateToken]) {
+        let prunedTokens = Dictionary(
+            uniqueKeysWithValues: tokens.values
+                .sorted { left, right in
+                    if left.cachedAt == right.cachedAt {
+                        return left.activityId > right.activityId
+                    }
+                    return left.cachedAt > right.cachedAt
+                }
+                .prefix(maxCachedUpdateTokens)
+                .map { ($0.activityId, $0) }
+        )
+
+        guard let data = try? JSONEncoder().encode(prunedTokens) else { return }
         UserDefaults.standard.set(data, forKey: CACHED_UPDATE_TOKENS_KEY)
     }
 
