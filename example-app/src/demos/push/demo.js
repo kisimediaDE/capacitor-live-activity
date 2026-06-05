@@ -18,7 +18,7 @@ window.onload = () => {
   $('push').value = localStorage.getItem(LS.PUSH) || '';
 
   // sinnvolle Defaults
-  $('attributes-type').value = 'LiveActivityWidgetExtension.GenericAttributes';
+  $('attributes-type').value = 'GenericAttributes';
   $('attrs').value = JSON.stringify({ id: 'demo-remote', staticValues: { type: 'delivery', title: '📦 Delivery' } }, null, 2);
   $('content').value = JSON.stringify({ status: 'Starting…', eta: '20 min' }, null, 2);
   $('alert').value = JSON.stringify({ title: 'Live Activity', body: 'Started remotely' }, null, 2);
@@ -85,6 +85,36 @@ window.observeActivityTokens = async () => {
     log('👂 Listening for per-activity push token…');
   } catch (e) {
     log('❌ observeActivityTokens: ' + e.message);
+  }
+};
+
+window.configureUpdateTokenEndpoint = async () => {
+  try {
+    await LiveActivity.setUpdateTokenEndpoint({
+      url: `${base()}/live-activity/register-token`,
+    });
+    log('🌐 Native update token endpoint registered.');
+  } catch (e) {
+    log('❌ configureUpdateTokenEndpoint: ' + e.message);
+  }
+};
+
+window.loadCachedActivityTokens = async () => {
+  try {
+    const attrs = JSON.parse($('attrs').value || '{}');
+    const id = attrs.id;
+    const { items } = await LiveActivity.getActivityPushTokens(id ? { id } : undefined);
+    const latest = items.at(-1);
+    if (!latest) {
+      log('ℹ️ No cached activity push token found.');
+      return;
+    }
+
+    $('push').value = latest.token;
+    localStorage.setItem(LS.PUSH, latest.token);
+    log(`📥 Cached activity push token for "${latest.id}" loaded.`);
+  } catch (e) {
+    log('❌ loadCachedActivityTokens: ' + e.message);
   }
 };
 

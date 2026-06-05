@@ -19,6 +19,7 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "listActivities", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "observePushToStartToken", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setUpdateTokenEndpoint", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getActivityPushTokens", returnType: CAPPluginReturnPromise),
     ]
 
     private let implementation = LiveActivity()
@@ -210,5 +211,10 @@ public class LiveActivityPlugin: CAPPlugin, CAPBridgedPlugin {
         } catch {
             call.reject(error.localizedDescription)
         }
+    }
+
+    @objc func getActivityPushTokens(_ call: CAPPluginCall) {
+        let id = call.getString("id")
+        call.resolve(["items": implementation.getActivityPushTokens(id: id)])
     }
 }

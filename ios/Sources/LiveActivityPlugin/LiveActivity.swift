@@ -7,13 +7,23 @@ private let EVT_PUSH_TO_START_TOKEN = "liveActivityPushToStartToken"
 private let EVT_ACTIVITY_UPDATE = "liveActivityUpdate"
 private let UPDATE_TOKEN_ENDPOINT_KEY =
     "de.kisimedia.capacitor-live-activity.updateTokenEndpoint"
+private let CACHED_UPDATE_TOKENS_KEY =
+    "de.kisimedia.capacitor-live-activity.cachedUpdateTokens"
 
 private struct UpdateTokenEndpoint: Codable {
     let url: String
 }
 
+private struct CachedUpdateToken: Codable {
+    let id: String
+    let activityId: String
+    let token: String
+    let cachedAt: TimeInterval
+}
+
 @available(iOS 16.2, *)
 @objc public class LiveActivity: NSObject {
+    private static let maxCachedUpdateTokens = 50
     private var activities: [String: Activity<GenericAttributes>] = [:]
     private var activityOrder: [String] = []
     private var observedTokenActivityIds = Set<String>()
@@ -22,15 +32,26 @@ private struct UpdateTokenEndpoint: Codable {
     private var pushTokenObservationDisabledActivityIds = Set<String>()
     private var updateTokenEndpoint: UpdateTokenEndpoint?
     private var updateTokenHeaders: [String: String] = [:]
+    private var cachedUpdateTokens: [String: CachedUpdateToken] = [:]
     private let activitiesQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.activities")
     private let endpointQueue = DispatchQueue(
         label: "de.kisimedia.capacitor-live-activity.update-token-endpoint")
+    private let tokenCacheQueue = DispatchQueue(
+        label: "de.kisimedia.capacitor-live-activity.update-token-cache")
     weak var plugin: CAPPlugin?
 
     override public init() {
         super.init()
         updateTokenEndpoint = Self.loadUpdateTokenEndpoint()
+        cachedUpdateTokens = Self.loadCachedUpdateTokens()
+        tokenCacheQueue.sync {
+            let prunedTokens = Self.prunedCachedUpdateTokens(cachedUpdateTokens)
+            if prunedTokens.count != cachedUpdateTokens.count {
+                cachedUpdateTokens = prunedTokens
+                Self.saveCachedUpdateTokens(cachedUpdateTokens)
+            }
+        }
 
         Task {
             for activity in Activity<GenericAttributes>.activities {
@@ -85,6 +106,29 @@ private struct UpdateTokenEndpoint: Codable {
                 "url": endpoint.url,
                 "headers": updateTokenHeaders,
             ]
+        }
+    }
+
+    @objc public func getActivityPushTokens(id: String?) -> [[String: String]] {
+        tokenCacheQueue.sync {
+            cachedUpdateTokens.values
+                .filter { token in
+                    guard let id else { return true }
+                    return token.id == id
+                }
+                .sorted { left, right in
+                    if left.cachedAt == right.cachedAt {
+                        return left.activityId < right.activityId
+                    }
+                    return left.cachedAt < right.cachedAt
+                }
+                .map { token in
+                    [
+                        "id": token.id,
+                        "activityId": token.activityId,
+                        "token": token.token,
+                    ]
+                }
         }
     }
 
@@ -431,9 +475,36 @@ private struct UpdateTokenEndpoint: Codable {
             "activityId": activityId,
             "token": token,
         ]
+        cacheUpdateToken(id: id, activityId: activityId, token: token)
 
         plugin?.notifyListeners(EVT_PUSH_TOKEN, data: payload)
         await registerUpdateToken(payload: payload)
+    }
+
+    private func cacheUpdateToken(id: String, activityId: String, token: String) {
+        tokenCacheQueue.sync {
+            if let existing = cachedUpdateTokens[activityId],
+                existing.id == id,
+                existing.token == token
+            {
+                return
+            }
+
+            cachedUpdateTokens[activityId] = CachedUpdateToken(
+                id: id,
+                activityId: activityId,
+                token: token,
+                cachedAt: Date().timeIntervalSince1970
+            )
+            pruneCachedUpdateTokens()
+            Self.saveCachedUpdateTokens(cachedUpdateTokens)
+        }
+    }
+
+    private func pruneCachedUpdateTokens() {
+        guard cachedUpdateTokens.count > Self.maxCachedUpdateTokens else { return }
+
+        cachedUpdateTokens = Self.prunedCachedUpdateTokens(cachedUpdateTokens)
     }
 
     private func registerUpdateToken(payload: [String: Any]) async {
@@ -486,6 +557,66 @@ private struct UpdateTokenEndpoint: Codable {
     private static func saveUpdateTokenEndpoint(_ endpoint: UpdateTokenEndpoint) {
         guard let data = try? JSONEncoder().encode(endpoint) else { return }
         UserDefaults.standard.set(data, forKey: UPDATE_TOKEN_ENDPOINT_KEY)
+    }
+
+    private static func loadCachedUpdateTokens() -> [String: CachedUpdateToken] {
+        guard let data = UserDefaults.standard.data(forKey: CACHED_UPDATE_TOKENS_KEY) else {
+            return [:]
+        }
+
+        if let tokens = try? JSONDecoder().decode([String: CachedUpdateToken].self, from: data) {
+            return tokens
+        }
+
+        guard let legacyTokens = try? JSONDecoder().decode(
+            [String: [String: String]].self, from: data)
+        else {
+            return [:]
+        }
+
+        return Dictionary(
+            uniqueKeysWithValues: legacyTokens.compactMap { activityId, token in
+                guard let id = token["id"],
+                    let tokenValue = token["token"]
+                else {
+                    return nil
+                }
+
+                return (
+                    activityId,
+                    CachedUpdateToken(
+                        id: id,
+                        activityId: activityId,
+                        token: tokenValue,
+                        cachedAt: 0
+                    )
+                )
+            })
+    }
+
+    private static func saveCachedUpdateTokens(_ tokens: [String: CachedUpdateToken]) {
+        let prunedTokens = prunedCachedUpdateTokens(tokens)
+
+        guard let data = try? JSONEncoder().encode(prunedTokens) else { return }
+        UserDefaults.standard.set(data, forKey: CACHED_UPDATE_TOKENS_KEY)
+    }
+
+    private static func prunedCachedUpdateTokens(
+        _ tokens: [String: CachedUpdateToken]
+    ) -> [String: CachedUpdateToken] {
+        guard tokens.count > maxCachedUpdateTokens else { return tokens }
+
+        return Dictionary(
+            uniqueKeysWithValues: tokens.values
+                .sorted { left, right in
+                    if left.cachedAt == right.cachedAt {
+                        return left.activityId > right.activityId
+                    }
+                    return left.cachedAt > right.cachedAt
+                }
+                .prefix(maxCachedUpdateTokens)
+                .map { ($0.activityId, $0) }
+        )
     }
 
     private static func isLoopbackHost(_ host: String?) -> Bool {

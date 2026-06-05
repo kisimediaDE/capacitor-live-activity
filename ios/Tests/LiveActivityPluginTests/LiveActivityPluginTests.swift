@@ -7,16 +7,20 @@ import XCTest
 final class LiveActivityPluginTests: XCTestCase {
     private let updateTokenEndpointKey =
         "de.kisimedia.capacitor-live-activity.updateTokenEndpoint"
+    private let cachedUpdateTokensKey =
+        "de.kisimedia.capacitor-live-activity.cachedUpdateTokens"
     var plugin: LiveActivity!
 
     override func setUp() {
         super.setUp()
         UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
+        UserDefaults.standard.removeObject(forKey: cachedUpdateTokensKey)
         plugin = LiveActivity()
     }
 
     override func tearDown() {
         UserDefaults.standard.removeObject(forKey: updateTokenEndpointKey)
+        UserDefaults.standard.removeObject(forKey: cachedUpdateTokensKey)
         super.tearDown()
     }
 
@@ -106,6 +110,105 @@ final class LiveActivityPluginTests: XCTestCase {
                 "https://example.com/live-activity/register-token"
             )
             XCTAssertEqual((endpoint?["headers"] as? [String: String])?.isEmpty, true)
+        }
+    }
+
+    func testGetActivityPushTokensReturnsPersistedTokens() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = [
+                "activity-1": [
+                    "id": "logical-1",
+                    "activityId": "activity-1",
+                    "token": "abc123",
+                ],
+                "activity-2": [
+                    "id": "logical-2",
+                    "activityId": "activity-2",
+                    "token": "def456",
+                ],
+            ]
+            let data = try JSONEncoder().encode(cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+
+            XCTAssertEqual(reloadedPlugin.getActivityPushTokens(id: nil).count, 2)
+            XCTAssertEqual(
+                reloadedPlugin.getActivityPushTokens(id: "logical-2").first?["token"],
+                "def456"
+            )
+        }
+    }
+
+    func testGetActivityPushTokensMigratesLegacyTokensUsingDictionaryKeyActivityId() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = [
+                "activity-key": [
+                    "id": "logical-1",
+                    "token": "abc123",
+                ]
+            ]
+            let data = try JSONEncoder().encode(cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let token = reloadedPlugin.getActivityPushTokens(id: "logical-1").first
+
+            XCTAssertEqual(token?["activityId"], "activity-key")
+            XCTAssertEqual(token?["token"], "abc123")
+        }
+    }
+
+    func testGetActivityPushTokensSortsByCachedAtWithoutExposingTimestamp() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens: [String: [String: Any]] = [
+                "activity-new": [
+                    "id": "logical-1",
+                    "activityId": "activity-new",
+                    "token": "new-token",
+                    "cachedAt": 200.0,
+                ],
+                "activity-old": [
+                    "id": "logical-1",
+                    "activityId": "activity-old",
+                    "token": "old-token",
+                    "cachedAt": 100.0,
+                ],
+            ]
+            let data = try JSONSerialization.data(withJSONObject: cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let tokens = reloadedPlugin.getActivityPushTokens(id: "logical-1")
+
+            XCTAssertEqual(tokens.map { $0["token"] }, ["old-token", "new-token"])
+            XCTAssertNil(tokens.last?["cachedAt"])
+        }
+    }
+
+    func testGetActivityPushTokensPrunesPersistedCacheOnStartup() throws {
+        if #available(iOS 16.2, *) {
+            let cachedTokens = Dictionary(
+                uniqueKeysWithValues: (0..<55).map { index in
+                    (
+                        "activity-\(index)",
+                        [
+                            "id": "logical-\(index)",
+                            "activityId": "activity-\(index)",
+                            "token": "token-\(index)",
+                            "cachedAt": Double(index),
+                        ] as [String: Any]
+                    )
+                })
+            let data = try JSONSerialization.data(withJSONObject: cachedTokens)
+            UserDefaults.standard.set(data, forKey: cachedUpdateTokensKey)
+
+            let reloadedPlugin = LiveActivity()
+            let tokens = reloadedPlugin.getActivityPushTokens(id: nil)
+
+            XCTAssertEqual(tokens.count, 50)
+            XCTAssertNil(tokens.first { $0["activityId"] == "activity-0" })
+            XCTAssertNotNil(tokens.first { $0["activityId"] == "activity-54" })
         }
     }
 

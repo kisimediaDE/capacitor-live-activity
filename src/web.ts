@@ -11,6 +11,7 @@ import type {
   EndActivityOptions,
   LiveActivityState,
   ListActivitiesResult,
+  GetActivityPushTokensResult,
   UpdateTokenEndpointOptions,
 } from './definitions';
 
@@ -65,5 +66,10 @@ export class LiveActivityWeb extends WebPlugin implements LiveActivityPlugin {
 
   async setUpdateTokenEndpoint(_options: UpdateTokenEndpointOptions): Promise<void> {
     console.warn('[LiveActivity] setUpdateTokenEndpoint is only available on iOS.');
+  }
+
+  async getActivityPushTokens(_options?: { id?: string }): Promise<GetActivityPushTokensResult> {
+    console.warn('[LiveActivity] getActivityPushTokens is only available on iOS.');
+    return { items: [] };
   }
 }

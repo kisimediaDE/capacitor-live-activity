@@ -279,6 +279,13 @@ The endpoint receives:
 }
 ```
 
+If the app was not foregrounded when iOS emitted the token, retrieve the cached native token later:
+
+```typescript
+const { items } = await LiveActivity.getActivityPushTokens({ id: 'delivery-123' });
+const latestToken = items.at(-1)?.token;
+```
+
 ## 📱 Example App
 
 This plugin includes a fully functional demo app under the [`example-app/`](./example-app) directory.
@@ -307,6 +314,7 @@ The demo is designed to run on real iOS devices and showcases multiple Live Acti
 * [`listActivities()`](#listactivities)
 * [`observePushToStartToken()`](#observepushtostarttoken)
 * [`setUpdateTokenEndpoint(...)`](#setupdatetokenendpoint)
+* [`getActivityPushTokens(...)`](#getactivitypushtokens)
 * [`addListener('liveActivityPushToken', ...)`](#addlistenerliveactivitypushtoken-)
 * [`addListener('liveActivityPushToStartToken', ...)`](#addlistenerliveactivitypushtostarttoken-)
 * [`addListener('liveActivityUpdate', ...)`](#addlistenerliveactivityupdate-)
@@ -536,6 +544,30 @@ logged natively and do not reject `startActivityWithPush`.
 --------------------
 
 
+### getActivityPushTokens(...)
+
+```typescript
+getActivityPushTokens(options?: { id?: string | undefined; } | undefined) => Promise<GetActivityPushTokensResult>
+```
+
+Return cached per-activity update tokens that iOS has already received.
+
+Use this as a fallback when `liveActivityPushToken` was emitted while the
+WebView was not running, for example after a Live Activity was started via
+push-to-start in the background. Pass `id` to filter by your logical
+activity id.
+
+| Param         | Type                          |
+| ------------- | ----------------------------- |
+| **`options`** | <code>{ id?: string; }</code> |
+
+**Returns:** <code>Promise&lt;<a href="#getactivitypushtokensresult">GetActivityPushTokensResult</a>&gt;</code>
+
+**Since:** 8.2.0
+
+--------------------
+
+
 ### addListener('liveActivityPushToken', ...)
 
 ```typescript
@@ -695,11 +727,13 @@ Options for native per-activity update token registration.
 | **`headers`** | <code><a href="#record">Record</a>&lt;string, string&gt;</code> | Optional HTTP headers added to the registration POST for the current app session only. Headers are not persisted; avoid long-lived secrets here.                        |
 
 
-#### PluginListenerHandle
+#### GetActivityPushTokensResult
 
-| Prop         | Type                                      |
-| ------------ | ----------------------------------------- |
-| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+Result of listing cached per-activity update tokens.
+
+| Prop        | Type                          |
+| ----------- | ----------------------------- |
+| **`items`** | <code>PushTokenEvent[]</code> |
 
 
 #### PushTokenEvent
@@ -711,6 +745,13 @@ Event payload for per-activity live-activity push tokens.
 | **`id`**         | <code>string</code> | Your logical ID (the one you passed to start).              |
 | **`activityId`** | <code>string</code> | System activity identifier (Activity.id).                   |
 | **`token`**      | <code>string</code> | Hex-encoded APNs/FCM live activity token for this activity. |
+
+
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
 
 
 #### PushToStartTokenEvent
